@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>MLC Controle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1F3F0;
+    --surface:#FFFFFF;
+    --ink:#182620;
+    --ink-soft:#5B665F;
+    --ink-faint:#93998F;
+    --primary:#1F4D3D;
+    --primary-dark:#123328;
+    --primary-soft:#E4ECE6;
+    --accent:#B98F1D;
+    --accent-soft:#F3E9CE;
+    --danger:#A6432E;
+    --danger-soft:#F3E0DA;
+    --line:#DADFDA;
+    --radius:14px;
+    --shadow: 0 1px 2px rgba(24,38,32,0.06), 0 8px 24px rgba(24,38,32,0.06);
+  }
+  *{box-sizing:border-box;}
+  button{font-family:inherit;color:inherit;background:none;border:none;padding:0;margin:0;-webkit-appearance:none;appearance:none;text-align:inherit;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+  }
+  #phone{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:var(--surface);
+    box-shadow:var(--shadow);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  @media(min-width:520px){
+    body{padding:32px 16px;}
+    #phone{min-height:calc(100vh - 64px); border-radius:20px; overflow:hidden; border:1px solid var(--line);}
+  }
+
+  /* Top bar */
+  .topbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:16px 18px;
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  .back-btn{
+    width:32px;height:32px;border-radius:8px;border:1px solid var(--line);
+    background:var(--surface);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--ink);flex-shrink:0;
+  }
+  .back-btn:active{background:var(--bg);}
+  .topbar .mark{
+    width:30px;height:30px;border-radius:7px;background:var(--primary);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    transform:rotate(-3deg);
+  }
+  .topbar .mark span{color:#fff;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;transform:rotate(3deg);}
+  .topbar .title-block{display:flex;flex-direction:column;line-height:1.15;}
+  .topbar .app-name{font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.01em;}
+  .topbar .app-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--ink-faint);text-transform:uppercase;}
+  .topbar .screen-label{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.08em;color:var(--ink-faint);text-transform:uppercase;text-align:right;}
+
+  /* Content */
+  #content{flex:1;padding:22px 18px 100px 18px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);margin-bottom:8px;}
+  h1.screen-title{font-family:'IBM Plex Sans',sans-serif;font-size:22px;font-weight:700;margin:0 0 6px 0;letter-spacing:-0.01em;}
+  p.screen-sub{color:var(--ink-soft);font-size:14px;line-height:1.5;margin:0 0 24px 0;}
+
+  /* Role cards (home) */
+  .role-card{
+    display:flex;align-items:flex-start;gap:14px;
+    padding:18px;border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--surface);cursor:pointer;margin-bottom:14px;text-align:left;
+    width:100%;color:var(--ink);
+  }
+  .role-card:active{background:var(--bg);}
+  .role-icon{
+    width:44px;height:44px;border-radius:10px;background:var(--primary-soft);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--primary);
+  }
+  .role-copy strong{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:15.5px;font-weight:600;margin-bottom:3px;color:var(--ink);}
+  .role-copy span{font-size:13px;color:var(--ink-soft);line-height:1.45;}
+
+  /* Form elements */
+  label{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 8px 0;}
+  input[type=text], select, textarea{
+    width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;
+    font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);background:var(--surface);
+    margin-bottom:20px;-webkit-appearance:none;appearance:none;
+  }
+  select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235B665F' stroke-width='1.6' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;
+  }
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--primary); outline-offset:1px; border-color:var(--primary);}
+  textarea{resize:vertical;min-height:80px;font-family:'Inter',sans-serif;}
+  .field-row{display:flex;gap:12px;}
+  .field-row > div{flex:1;}
+
+  .empresa-card{
+    display:flex;align-items:center;gap:14px;padding:16px;border:1.5px solid var(--line);
+    border-radius:var(--radius);margin-bottom:12px;cursor:pointer;background:var(--surface);
+  }
+  .empresa-card.selected{border-color:var(--primary); background:var(--primary-soft);}
+  .empresa-dot{width:38px;height:38px;border-radius:9px;flex-shrink:0;}
+  .empresa-dot.gesso{background:#8FA79A;}
+  .empresa-dot.pintura{background:#C9A24C;}
+  .empresa-card strong{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;}
+  .empresa-card span{font-size:12.5px;color:var(--ink-soft);}
+
+  .ponto-card{
+    border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;
+  }
+  .ponto-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .ponto-head strong{font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;}
+  .foto-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;padding:11px;border-radius:9px;border:1.5px dashed var(--line);
+    background:var(--bg);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .foto-btn.ok{border-style:solid;border-color:var(--primary);background:var(--primary-soft);color:var(--primary-dark);font-weight:600;}
+
+  /* Buttons */
+  .btn{
+    width:100%;padding:15px;border-radius:10px;border:none;font-family:'IBM Plex Sans',sans-serif;
+    font-size:15px;font-weight:600;cursor:pointer;text-align:center;
+  }
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-primary:active{background:var(--primary-dark);}
+  .btn-primary:disabled{background:var(--ink-faint);cursor:not-allowed;}
+  .btn-outline{background:var(--surface);color:var(--primary);border:1.5px solid var(--primary);}
+  .btn-danger-outline{background:var(--surface);color:var(--danger);border:1.5px solid var(--danger);}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);}
+  .btn-row{display:flex;gap:10px;}
+  .btn-row .btn{flex:1;}
+
+  /* Bottom bar */
+  .bottombar{
+    position:fixed;max-width:430px;width:100%;bottom:0;left:50%;transform:translateX(-50%);
+    padding:14px 18px calc(14px + env(safe-area-inset-bottom));background:var(--surface);
+    border-top:1px solid var(--line);
+  }
+
+  /* Stamp / status */
+  .stamp{
+    display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:0.07em;
+    text-transform:uppercase;white-space:nowrap;flex-shrink:0;
+  }
+  .stamp::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+  .stamp.pendente{color:#6B7269;background:#E7E9E5;border:1px solid #D3D7D0;}
+  .stamp.conferido{color:#1F4D3D;background:#DCEBE2;border:1px solid #BBDBC8;}
+  .stamp.pendencia{color:#8A3524;background:#F5DFD6;border:1px solid #E9BCA9;}
+
+  /* Tonalidade leve por status nos cards da lista */
+  .reg-card-pendente{background:#F4F5F3;}
+  .reg-card-conferido{background:#FFFFFF;border-color:#CFE3D7;}
+  .reg-card-pendencia{background:#FBF3F0;border-color:#E9BCA9;}
+
+  /* Lista Fiscal */
+  .filtros{display:flex;gap:8px;margin-bottom:18px;}
+  .filtro-chip{
+    padding:8px 13px;border-radius:20px;border:1px solid var(--line);font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;letter-spacing:0.04em;color:var(--ink-soft);cursor:pointer;background:var(--surface);
+  }
+  .filtro-chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+  .reg-card{
+    border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px;cursor:pointer;background:var(--surface);
+  }
+  .reg-card:active{background:var(--bg);}
+  .reg-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px;}
+  .reg-local{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--ink);}
+  .reg-meta{font-size:13px;color:var(--ink-soft);margin-bottom:2px;}
+  .reg-data{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-faint);}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);}
+  .empty-state svg{margin-bottom:14px;color:var(--ink-faint);}
+
+  /* Detail */
+  .detail-header{
+    background:var(--primary-soft);border-radius:var(--radius);padding:18px;margin-bottom:22px;
+  }
+  .detail-header .reg-local{font-size:19px;margin-bottom:4px;}
+  .detail-header .reg-meta{color:var(--primary-dark);}
+  .pt-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);}
+  .pt-item:last-child{border-bottom:none;}
+  .pt-item .pt-name{font-size:14px;}
+  .pt-status-ok{display:flex;align-items:center;gap:6px;color:var(--primary-dark);font-size:12.5px;font-weight:600;}
+  .pt-status-off{color:var(--ink-faint);font-size:12.5px;}
+  .obs-box{background:var(--bg);border-radius:10px;padding:14px;font-size:14px;color:var(--ink-soft);line-height:1.5;margin-bottom:22px;}
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);margin:26px 0 12px 0;}
+
+  .hist-item{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .hist-item:last-child{border-bottom:none;}
+
+  /* Success */
+  .success-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:50px 10px;}
+  .success-stamp{
+    width:120px;height:120px;border-radius:50%;border:4px double var(--primary);
+    display:flex;align-items:center;justify-content:center;transform:rotate(-6deg);margin-bottom:26px;
+  }
+  .success-stamp span{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;color:var(--primary-dark);letter-spacing:0.06em;transform:rotate(6deg);}
+
+  ::selection{background:var(--accent-soft);}
+
+  /* ---------- Dark mode ---------- */
+  body.dark{
+    --bg:#101513;
+    --surface:#1A2420;
+    --ink:#ECF1EC;
+    --ink-soft:#9CA6A0;
+    --ink-faint:#66706A;
+    --primary:#4FA47C;
+    --primary-dark:#3C8A66;
+    --primary-soft:#1E2E27;
+    --accent:#D9BB57;
+    --accent-soft:#332B18;
+    --danger:#E2836A;
+    --danger-soft:#3A2119;
+    --line:#2A332E;
+    --shadow:0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.5);
+    background:#05070685;
+  }
+  body.dark select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA6A0' stroke-width='1.6' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+  }
+  body.dark .stamp.pendente{color:#B7BDB8;background:#242C28;border-color:#3A423C;}
+  body.dark .stamp.conferido{color:#8FD6B2;background:#1B3327;border-color:#2E5A43;}
+  body.dark .stamp.pendencia{color:#F0A98C;background:#3A241D;border-color:#5C3729;}
+  body.dark .reg-card-pendente{background:#151C18;}
+  body.dark .reg-card-conferido{background:var(--surface);border-color:#2E5A43;}
+  body.dark .reg-card-pendencia{background:#20140F;border-color:#5C3729;}
+  body.dark .detail-header .reg-meta{color:#8FD6B2;}
+  body.dark .success-stamp span{color:#8FD6B2;}
+
+  .theme-btn{
+    width:32px;height:32px;border-radius:8px;border:1px solid var(--line);
+    background:var(--surface);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--ink-soft);flex-shrink:0;margin-left:auto;
+  }
+  .theme-btn:active{background:var(--bg);}
+  .topbar .screen-label{margin-left:10px;}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div id="topbar-slot"></div>
+  <div id="content"></div>
+  <div id="bottombar-slot"></div>
+</div>
+
+<script>
+/* ---------- Dados fixos (empresas e serviços) ---------- */
+const EMPRESAS = {
+  gesso: {
+    nome: 'Melhor Gesso',
+    corClasse: 'gesso',
+    servicos: {
+      teto: { nome: 'Gesso — Teto', pontos: ['Vista geral do teto','Canto esquerdo','Canto direito','Acabamento da sanca'] },
+      sanca: { nome: 'Gesso — Sanca', pontos: ['Sanca da sala','Sanca do quarto','Emenda e acabamento'] },
+      rebaixamento: { nome: 'Gesso — Rebaixamento', pontos: ['Estrutura metálica','Fechamento das placas','Nivelamento final'] }
+    }
+  },
+  pintura: {
+    nome: 'Pintura Total',
+    corClasse: 'pintura',
+    servicos: {
+      geral: { nome: 'Pintura Geral', pontos: ['Parede principal','Teto','Rodapé'] },
+      cozinha: { nome: 'Pintura Cozinha', pontos: ['Vista da porta','Vista da janela','Lavanderia'] },
+      sala: { nome: 'Pintura Sala', pontos: ['Parede da TV','Parede do sofá','Teto'] },
+      quarto: { nome: 'Pintura Quarto', pontos: ['Parede da cama','Guarda-roupa','Teto'] }
+    }
+  }
+};
+
+/* ---------- Dados de exemplo (para a tela do fiscal já nascer com conteúdo) ---------- */
+let lancamentos = [
+  {
+    id: 'L1', empresaKey:'gesso', servicoKey:'teto', bloco:'B', apto:'304',
+    terceiroNome:'Carlos Andrade', data:'22/06/2026',
+    pontos:[
+      {nome:'Vista geral do teto', foto:'teto_geral.jpg'},
+      {nome:'Canto esquerdo', foto:'canto_esq.jpg'},
+      {nome:'Canto direito', foto:null},
+      {nome:'Acabamento da sanca', foto:'sanca.jpg'}
+    ],
+    observacao:'Segunda demão aplicada. Falta acabamento fino no canto direito.',
+    status:'pendente', notaFiscal:''
+  },
+  {
+    id: 'L2', empresaKey:'gesso', servicoKey:'teto', bloco:'B', apto:'304',
+    terceiroNome:'Carlos Andrade', data:'07/06/2026',
+    pontos:[
+      {nome:'Vista geral do teto', foto:'teto_geral_v1.jpg'},
+      {nome:'Canto esquerdo', foto:'canto_esq_v1.jpg'},
+      {nome:'Canto direito', foto:'canto_dir_v1.jpg'},
+      {nome:'Acabamento da sanca', foto:'sanca_v1.jpg'}
+    ],
+    observacao:'Início do serviço, primeira demão.',
+    status:'conferido', notaFiscal:'Estrutura ok, liberado para próxima etapa.'
+  },
+  {
+    id: 'L3', empresaKey:'pintura', servicoKey:'cozinha', bloco:'A', apto:'112',
+    terceiroNome:'Paulo Ricardo', data:'25/06/2026',
+    pontos:[
+      {nome:'Vista da porta', foto:'porta.jpg'},
+      {nome:'Vista da janela', foto:'janela.jpg'},
+      {nome:'Lavanderia', foto:null}
+    ],
+    observacao:'Faltou registrar a lavanderia, retornar amanhã.',
+    status:'pendencia', notaFiscal:'Respingos de tinta no piso da lavanderia, corrigir antes de fechar o item.'
+  },
+  {
+    id: 'L4', empresaKey:'pintura', servicoKey:'sala', bloco:'C', apto:'208',
+    terceiroNome:'Jorge Almeida', data:'28/06/2026',
+    pontos:[
+      {nome:'Parede da TV', foto:'parede_tv.jpg'},
+      {nome:'Parede do sofá', foto:'parede_sofa.jpg'},
+      {nome:'Teto', foto:null}
+    ],
+    observacao:'Pintura da sala em andamento, teto será finalizado amanhã.',
+    status:'pendente', notaFiscal:''
+  },
+  {
+    id: 'L5', empresaKey:'gesso', servicoKey:'rebaixamento', bloco:'B', apto:'210',
+    terceiroNome:'Jorge Almeida', data:'27/06/2026',
+    pontos:[
+      {nome:'Estrutura metálica', foto:'estrutura.jpg'},
+      {nome:'Fechamento das placas', foto:'fechamento.jpg'},
+      {nome:'Nivelamento final', foto:'nivelamento.jpg'}
+    ],
+    observacao:'Rebaixamento concluído, aguardando conferência.',
+    status:'conferido', notaFiscal:'Nivelamento aprovado, sem ressalvas.'
+  }
+];
+let seq = 6;
+
+/* ---------- Estado da aplicação ---------- */
+let state = {
+  screen:'home',
+  role:null,
+  darkMode:false,
+  nome:'',
+  empresaKey:null,
+  bloco:'',
+  apto:'',
+  servicoKey:'',
+  pontos:[],
+  observacao:'',
+  fiscalNome:'',
+  filtroEmpresa:null,
+  filtroStatus:'todos',
+  currentId:null,
+  pendenciaNota:''
+};
+
+function go(screen){ state.screen = screen; render(); window.scrollTo(0,0); }
+
+/* ---------- Ícones (SVG simples, sem marcas registradas) ---------- */
+const icon = {
+  helmet:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 18a8 8 0 0 1 16 0z"/><path d="M2 18h20"/><path d="M12 6v4"/></svg>`,
+  ruler:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v3M15 8v3"/></svg>`,
+  back:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>`,
+  sun:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>`,
+  moon:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>`,
+  camera:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.3"/></svg>`,
+  check:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>`,
+  empty:`<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>`
+};
+
+/* ---------- Topbar ---------- */
+function renderTopbar(){
+  const showBack = state.screen !== 'home';
+  const labels = {
+    home:'', 'terceiro-nome':'Novo lançamento','terceiro-empresa':'Novo lançamento','terceiro-local':'Novo lançamento',
+    'terceiro-servico':'Novo lançamento','terceiro-pontos':'Novo lançamento','terceiro-revisao':'Revisão',
+    'terceiro-sucesso':'','fiscal-nome':'Fiscalização','fiscal-empresas':'Fiscalização','fiscal-lista':'Fiscalização','fiscal-detalhe':'Registro'
+  };
+  document.getElementById('topbar-slot').innerHTML = `
+    <div class="topbar">
+      ${showBack ? `<button class="back-btn" onclick="handleBack()">${icon.back}</button>` : `<div class="mark"><span>M</span></div>`}
+      ${showBack ? '' : `<div class="title-block"><span class="app-name">MLC Controle</span><span class="app-tag">Registro de obra</span></div>`}
+      ${showBack ? `<span class="screen-label">${labels[state.screen]||''}</span>` : ''}
+      <button class="theme-btn" onclick="alternarTema()">${state.darkMode ? icon.sun : icon.moon}</button>
+    </div>`;
+}
+
+function alternarTema(){
+  state.darkMode = !state.darkMode;
+  document.body.classList.toggle('dark', state.darkMode);
+  render();
+}
+
+function handleBack(){
+  const flow = {
+    'terceiro-nome':'home','terceiro-empresa':'terceiro-nome','terceiro-local':'terceiro-empresa',
+    'terceiro-servico':'terceiro-local','terceiro-pontos':'terceiro-servico','terceiro-revisao':'terceiro-pontos',
+    'fiscal-nome':'home','fiscal-empresas':'fiscal-nome','fiscal-lista':'fiscal-empresas','fiscal-detalhe':'fiscal-lista'
+  };
+  go(flow[state.screen] || 'home');
+}
+
+/* ---------- HOME ---------- */
+function screenHome(){
+  return `
+  <div class="eyebrow">Selecione seu perfil</div>
+  <h1 class="screen-title">Quem está acessando?</h1>
+  <p class="screen-sub">Escolha como você participa da obra para abrirmos o fluxo certo.</p>
+  <button class="role-card" onclick="state.role='terceiro'; go('terceiro-nome')">
+    <div class="role-icon">${icon.helmet}</div>
+    <div class="role-copy"><strong>Sou Terceiro</strong><span>Empresa prestadora de serviço (gesso, pintura). Registrar o que foi executado.</span></div>
+  </button>
+  <button class="role-card" onclick="state.role='fiscal'; go('fiscal-nome')">
+    <div class="role-icon">${icon.ruler}</div>
+    <div class="role-copy"><strong>Sou Arquiteto / Engenheiro</strong><span>Conferir os lançamentos das empresas e acompanhar a evolução da obra.</span></div>
+  </button>`;
+}
+
+/* ---------- FLUXO TERCEIRO ---------- */
+function screenTerceiroNome(){
+  return `
+  <div class="eyebrow">Passo 1 de 5</div>
+  <h1 class="screen-title">Como você se chama?</h1>
+  <p class="screen-sub">Usamos seu nome para identificar quem fez o lançamento.</p>
+  <label>Nome completo</label>
+  <input type="text" id="inpNome" placeholder="Ex.: Carlos Andrade" value="${state.nome}">
+  <div class="bottombar"><button class="btn btn-primary" onclick="confirmarNome()">Continuar</button></div>`;
+}
+function confirmarNome(){
+  const v = document.getElementById('inpNome').value.trim();
+  if(!v){ alert('Digite seu nome para continuar.'); return; }
+  state.nome = v; go('terceiro-empresa');
+}
+
+function screenTerceiroEmpresa(){
+  const cards = Object.keys(EMPRESAS).map(key=>{
+    const e = EMPRESAS[key];
+    const sel = state.empresaKey===key ? 'selected' : '';
+    return `<div class="empresa-card ${sel}" onclick="selecionarEmpresa('${key}')">
+      <div class="empresa-dot ${e.corClasse}"></div>
+      <div><strong>${e.nome}</strong><span>${Object.keys(e.servicos).length} tipos de serviço</span></div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="eyebrow">Passo 2 de 5</div>
+  <h1 class="screen-title">Qual empresa, ${state.nome.split(' ')[0]}?</h1>
+  <p class="screen-sub">Selecione a empresa responsável pelo lançamento.</p>
+  ${cards}
+  <div class="bottombar"><button class="btn btn-primary" ${state.empresaKey?'':'disabled'} onclick="go('terceiro-local')">Continuar</button></div>`;
+}
+function selecionarEmpresa(key){ state.empresaKey = key; state.servicoKey=''; render(); }
+
+function screenTerceiroLocal(){
+  return `
+  <div class="eyebrow">Passo 3 de 5</div>
+  <h1 class="screen-title">Onde foi o serviço?</h1>
+  <p class="screen-sub">Informe o bloco e o apartamento do lançamento.</p>
+  <div class="field-row">
+    <div><label>Bloco</label><input type="text" id="inpBloco" placeholder="Ex.: B" value="${state.bloco}"></div>
+    <div><label>Apartamento</label><input type="text" id="inpApto" placeholder="Ex.: 304" value="${state.apto}"></div>
+  </div>
+  <div class="bottombar"><button class="btn btn-primary" onclick="confirmarLocal()">Continuar</button></div>`;
+}
+function confirmarLocal(){
+  const b = document.getElementById('inpBloco').value.trim();
+  const a = document.getElementById('inpApto').value.trim();
+  if(!b || !a){ alert('Preencha bloco e apartamento.'); return; }
+  state.bloco=b; state.apto=a; go('terceiro-servico');
+}
+
+function screenTerceiroServico(){
+  const servicos = EMPRESAS[state.empresaKey].servicos;
+  const options = Object.keys(servicos).map(k=>`<option value="${k}" ${state.servicoKey===k?'selected':''}>${servicos[k].nome}</option>`).join('');
+  return `
+  <div class="eyebrow">Passo 4 de 5</div>
+  <h1 class="screen-title">Tipo de serviço</h1>
+  <p class="screen-sub">Selecione o serviço prestado em ${EMPRESAS[state.empresaKey].nome}.</p>
+  <label>Serviço</label>
+  <select id="selServico">
+    <option value="">Selecione...</option>
+    ${options}
+  </select>
+  <div class="bottombar"><button class="btn btn-primary" onclick="confirmarServico()">Continuar</button></div>`;
+}
+function confirmarServico(){
+  const v = document.getElementById('selServico').value;
+  if(!v){ alert('Selecione o tipo de serviço.'); return; }
+  state.servicoKey = v;
+  const pontosBase = EMPRESAS[state.empresaKey].servicos[v].pontos;
+  state.pontos = pontosBase.map(nome=>({nome, foto:null}));
+  go('terceiro-pontos');
+}
+
+function screenTerceiroPontos(){
+  const cards = state.pontos.map((p,i)=>`
+    <div class="ponto-card">
+      <div class="ponto-head"><strong>${p.nome}</strong>${p.foto?`<span class="pt-status-ok">${icon.check} anexada</span>`:''}</div>
+      <label class="foto-btn ${p.foto?'ok':''}" for="file${i}">
+        ${icon.camera} ${p.foto ? p.foto : 'Anexar foto deste ponto'}
+      </label>
+      <input type="file" id="file${i}" accept="image/*" capture="environment" style="display:none" onchange="anexarFoto(${i}, this)">
+    </div>`).join('');
+  return `
+  <div class="eyebrow">Passo 5 de 5</div>
+  <h1 class="screen-title">Pontos de verificação</h1>
+  <p class="screen-sub">Registre uma foto para cada ponto do serviço "${EMPRESAS[state.empresaKey].servicos[state.servicoKey].nome}".</p>
+  ${cards}
+  <label style="margin-top:6px;">Observação (opcional)</label>
+  <textarea id="inpObs" placeholder="Alguma informação adicional sobre o lançamento...">${state.observacao}</textarea>
+  <div class="bottombar"><button class="btn btn-primary" onclick="irParaRevisao()">Revisar lançamento</button></div>`;
+}
+function anexarFoto(i, input){
+  const nome = input.files && input.files[0] ? input.files[0].name : 'foto.jpg';
+  state.pontos[i].foto = nome;
+  render();
+}
+function irParaRevisao(){
+  state.observacao = document.getElementById('inpObs').value.trim();
+  go('terceiro-revisao');
+}
+
+function screenTerceiroRevisao(){
+  const emp = EMPRESAS[state.empresaKey];
+  const serv = emp.servicos[state.servicoKey];
+  const pontosList = state.pontos.map(p=>`
+    <div class="pt-item"><span class="pt-name">${p.nome}</span>
+      ${p.foto? `<span class="pt-status-ok">${icon.check} ${p.foto}</span>` : `<span class="pt-status-off">sem foto</span>`}
+    </div>`).join('');
+  return `
+  <div class="eyebrow">Confirmar antes de enviar</div>
+  <h1 class="screen-title">Revisão do lançamento</h1>
+  <div class="detail-header">
+    <div class="reg-local">Bloco ${state.bloco} · Apto ${state.apto}</div>
+    <div class="reg-meta">${emp.nome} — ${serv.nome}</div>
+    <div class="reg-meta">Lançado por ${state.nome}</div>
+  </div>
+  <div class="section-label">Pontos de verificação</div>
+  ${pontosList}
+  ${state.observacao ? `<div class="section-label">Observação</div><div class="obs-box">${state.observacao}</div>` : ''}
+  <div class="bottombar"><button class="btn btn-primary" onclick="enviarLancamento()">Enviar lançamento</button></div>`;
+}
+function enviarLancamento(){
+  const novo = {
+    id:'L'+(seq++), empresaKey:state.empresaKey, servicoKey:state.servicoKey,
+    bloco:state.bloco, apto:state.apto, terceiroNome:state.nome,
+    data: new Date().toLocaleDateString('pt-BR'),
+    pontos: state.pontos.map(p=>({...p})), observacao: state.observacao,
+    status:'pendente', notaFiscal:''
+  };
+  lancamentos.unshift(novo);
+  go('terceiro-sucesso');
+}
+
+function screenTerceiroSucesso(){
+  return `
+  <div class="success-wrap">
+    <div class="success-stamp"><span>ENVIADO</span></div>
+    <h1 class="screen-title">Lançamento registrado</h1>
+    <p class="screen-sub">Bloco ${state.bloco}, apto ${state.apto} — o arquiteto/engenheiro responsável poderá conferir este registro.</p>
+    <div style="width:100%;display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-primary" onclick="novoLancamento()">Novo lançamento</button>
+      <button class="btn btn-ghost" onclick="resetTudo()">Voltar ao início</button>
+    </div>
+  </div>`;
+}
+function novoLancamento(){
+  state.bloco=''; state.apto=''; state.servicoKey=''; state.pontos=[]; state.observacao='';
+  go('terceiro-empresa');
+}
+
+/* ---------- FLUXO FISCAL (arquiteto/engenheiro) ---------- */
+function screenFiscalNome(){
+  return `
+  <div class="eyebrow">Identificação</div>
+  <h1 class="screen-title">Como você se chama?</h1>
+  <p class="screen-sub">Seu nome fica associado às conferências que você realizar.</p>
+  <label>Nome completo</label>
+  <input type="text" id="inpFiscalNome" placeholder="Ex.: Maria L." value="${state.fiscalNome}">
+  <div class="bottombar"><button class="btn btn-primary" onclick="confirmarFiscalNome()">Ver lançamentos</button></div>`;
+}
+function confirmarFiscalNome(){
+  const v = document.getElementById('inpFiscalNome').value.trim();
+  if(!v){ alert('Digite seu nome para continuar.'); return; }
+  state.fiscalNome = v; go('fiscal-empresas');
+}
+
+function screenFiscalEmpresas(){
+  const cards = Object.keys(EMPRESAS).map(key=>{
+    const e = EMPRESAS[key];
+    const regs = lancamentos.filter(l=>l.empresaKey===key);
+    const pendentes = regs.filter(l=>l.status==='pendente').length;
+    return `<div class="empresa-card" onclick="abrirEmpresa('${key}')">
+      <div class="empresa-dot ${e.corClasse}"></div>
+      <div><strong>${e.nome}</strong><span>${regs.length} lançamento${regs.length===1?'':'s'} · ${pendentes} pendente${pendentes===1?'':'s'} de conferência</span></div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="eyebrow">Olá, ${state.fiscalNome.split(' ')[0]}</div>
+  <h1 class="screen-title">Qual empresa você quer conferir?</h1>
+  <p class="screen-sub">Selecione a empresa para ver os lançamentos feitos por cada responsável.</p>
+  ${cards}`;
+}
+function abrirEmpresa(key){ state.filtroEmpresa = key; state.filtroStatus='todos'; go('fiscal-lista'); }
+
+function screenFiscalLista(){
+  const emp = EMPRESAS[state.filtroEmpresa];
+  const filtros = [
+    {k:'todos', label:'Todos'}, {k:'pendente', label:'Pendente'},
+    {k:'conferido', label:'Conferido'}, {k:'pendencia', label:'Com pendência'}
+  ];
+  const chips = filtros.map(f=>`<div class="filtro-chip ${state.filtroStatus===f.k?'active':''}" onclick="state.filtroStatus='${f.k}'; render()">${f.label}</div>`).join('');
+  const lista = lancamentos.filter(l=> l.empresaKey===state.filtroEmpresa && (state.filtroStatus==='todos' || l.status===state.filtroStatus));
+  const statusLabel = {pendente:'Pendente', conferido:'Conferido', pendencia:'Com pendência'};
+  const cards = lista.map(l=>{
+    const serv = emp.servicos[l.servicoKey];
+    return `<div class="reg-card reg-card-${l.status}" onclick="abrirDetalhe('${l.id}')">
+      <div class="reg-top">
+        <div><div class="reg-local">Bloco ${l.bloco} · Apto ${l.apto}</div>
+        <div class="reg-meta"><strong>${l.terceiroNome}</strong> lançou — ${serv.nome}</div></div>
+        <span class="stamp ${l.status}">${statusLabel[l.status]}</span>
+      </div>
+      <div class="reg-data">${l.data}</div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="eyebrow">${emp.nome}</div>
+  <h1 class="screen-title">Lançamentos por responsável</h1>
+  <p class="screen-sub">Toque em um registro para conferir os detalhes.</p>
+  <div class="filtros">${chips}</div>
+  ${cards || `<div class="empty-state">${icon.empty}<div>Nenhum lançamento neste filtro ainda.</div></div>`}`;
+}
+function abrirDetalhe(id){ state.currentId = id; state.pendenciaNota=''; go('fiscal-detalhe'); }
+
+function screenFiscalDetalhe(){
+  const l = lancamentos.find(x=>x.id===state.currentId);
+  const emp = EMPRESAS[l.empresaKey], serv = emp.servicos[l.servicoKey];
+  const statusLabel = {pendente:'Pendente', conferido:'Conferido', pendencia:'Com pendência'};
+  const pontosList = l.pontos.map(p=>`
+    <div class="pt-item"><span class="pt-name">${p.nome}</span>
+      ${p.foto? `<span class="pt-status-ok">${icon.check} ${p.foto}</span>` : `<span class="pt-status-off">sem foto</span>`}
+    </div>`).join('');
+
+  const historico = lancamentos.filter(x=> x.bloco===l.bloco && x.apto===l.apto && x.servicoKey===l.servicoKey && x.empresaKey===l.empresaKey)
+    .sort((a,b)=> a.id.localeCompare(b.id));
+  const histList = historico.map(h=>`
+    <div class="hist-item"><span>${h.data} — ${h.terceiroNome}</span><span class="stamp ${h.status}" style="transform:none;padding:2px 8px;">${statusLabel[h.status]}</span></div>`).join('');
+
+  const acoes = l.status==='conferido' ? `
+    <div class="obs-box" style="background:var(--primary-soft);color:var(--primary-dark);"><strong>Nota da fiscalização:</strong><br>${l.notaFiscal||'—'}</div>
+    <button class="btn btn-ghost" onclick="reabrirConferencia('${l.id}')">Reabrir conferência</button>
+  ` : `
+    <label>Nota da fiscalização (opcional para aprovar, obrigatória para pendência)</label>
+    <textarea id="inpNotaFiscal" placeholder="Ex.: Estrutura ok, liberado para próxima etapa.">${l.notaFiscal||''}</textarea>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="registrarPendencia('${l.id}')">Registrar pendência</button>
+      <button class="btn btn-primary" onclick="marcarConferido('${l.id}')">Marcar conferido</button>
+    </div>
+  `;
+
+  return `
+  <div class="detail-header">
+    <div class="reg-top" style="margin-bottom:0;">
+      <div><div class="reg-local">Bloco ${l.bloco} · Apto ${l.apto}</div>
+      <div class="reg-meta">${emp.nome} — ${serv.nome}</div>
+      <div class="reg-meta">${l.data} · lançado por ${l.terceiroNome}</div></div>
+      <span class="stamp ${l.status}">${statusLabel[l.status]}</span>
+    </div>
+  </div>
+
+  <div class="section-label">Pontos de verificação</div>
+  ${pontosList}
+
+  ${l.observacao ? `<div class="section-label">Observação do terceiro</div><div class="obs-box">${l.observacao}</div>` : ''}
+
+  <div class="section-label">Histórico deste serviço · ${l.bloco}/${l.apto}</div>
+  ${histList}
+
+  <div class="section-label">Conferência</div>
+  ${acoes}
+  <div style="height:20px;"></div>`;
+}
+function marcarConferido(id){
+  const l = lancamentos.find(x=>x.id===id);
+  l.notaFiscal = document.getElementById('inpNotaFiscal').value.trim();
+  l.status = 'conferido';
+  render();
+}
+function registrarPendencia(id){
+  const l = lancamentos.find(x=>x.id===id);
+  const nota = document.getElementById('inpNotaFiscal').value.trim();
+  if(!nota){ alert('Descreva a pendência antes de registrar.'); return; }
+  l.notaFiscal = nota;
+  l.status = 'pendencia';
+  render();
+}
+function reabrirConferencia(id){
+  const l = lancamentos.find(x=>x.id===id);
+  l.status = 'pendente';
+  render();
+}
+
+function resetTudo(){
+  const tema = state.darkMode;
+  state = {screen:'home', role:null, darkMode:tema, nome:'', empresaKey:null, bloco:'', apto:'', servicoKey:'', pontos:[], observacao:'', fiscalNome:'', filtroEmpresa:null, filtroStatus:'todos', currentId:null, pendenciaNota:''};
+  render();
+}
+
+/* ---------- Render principal ---------- */
+const screens = {
+  'home': screenHome,
+  'terceiro-nome': screenTerceiroNome,
+  'terceiro-empresa': screenTerceiroEmpresa,
+  'terceiro-local': screenTerceiroLocal,
+  'terceiro-servico': screenTerceiroServico,
+  'terceiro-pontos': screenTerceiroPontos,
+  'terceiro-revisao': screenTerceiroRevisao,
+  'terceiro-sucesso': screenTerceiroSucesso,
+  'fiscal-nome': screenFiscalNome,
+  'fiscal-empresas': screenFiscalEmpresas,
+  'fiscal-lista': screenFiscalLista,
+  'fiscal-detalhe': screenFiscalDetalhe
+};
+
+function render(){
+  renderTopbar();
+  document.getElementById('bottombar-slot').innerHTML='';
+  document.getElementById('content').innerHTML = screens[state.screen]();
+}
+render();
+</script>
+</body>
+</html>
