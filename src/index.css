@@ -27,6 +27,7 @@
     justify-content:center;
     -webkit-tap-highlight-color:transparent;
   }
+  #root{display:contents;}
   #phone{
     width:100%;
     max-width:430px;
