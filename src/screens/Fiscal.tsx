@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { EMPRESAS, STATUS_LABEL, type Lancamento, type Status } from "../data";
 import { CheckIcon, EmptyIcon } from "../icons";
+import { BLOCO_IMAGENS, IMG } from "../images";
 
 type FiscalNomeProps = {
   fiscalNome: string;
@@ -49,7 +50,7 @@ export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: Fisc
         const pendentes = regs.filter((l) => l.status === "pendente").length;
         return (
           <div key={key} className="empresa-card" onClick={() => onAbrirEmpresa(key)}>
-            <div className={`empresa-dot ${e.corClasse}`} />
+            <img className="empresa-thumb" src={e.imagem} alt={e.nome} />
             <div>
               <strong>{e.nome}</strong>
               <span>
@@ -105,10 +106,12 @@ export function FiscalLista({ empresaKey, lancamentos, filtroStatus, onFiltroCha
       ) : (
         lista.map((l) => {
           const serv = emp.servicos[l.servicoKey];
+          const blocoImg = BLOCO_IMAGENS[l.bloco];
           return (
             <div key={l.id} className={`reg-card reg-card-${l.status}`} onClick={() => onAbrirDetalhe(l.id)}>
               <div className="reg-top">
-                <div>
+                {blocoImg && <img className="reg-thumb" src={blocoImg} alt={`Bloco ${l.bloco}`} />}
+                <div style={{ flex: 1 }}>
                   <div className="reg-local">Bloco {l.bloco} · Apto {l.apto}</div>
                   <div className="reg-meta"><strong>{l.terceiroNome}</strong> lançou — {serv.nome}</div>
                 </div>
@@ -149,8 +152,11 @@ export function FiscalDetalhe({ lancamento: l, todos, onMarcarConferido, onRegis
     onRegistrarPendencia(v);
   };
 
+  const blocoImg = BLOCO_IMAGENS[l.bloco];
+
   return (
     <>
+      {blocoImg && <img className="bloco-banner" src={blocoImg} alt={`Bloco ${l.bloco}`} />}
       <div className="detail-header">
         <div className="reg-top" style={{ marginBottom: 0 }}>
           <div>
@@ -163,13 +169,21 @@ export function FiscalDetalhe({ lancamento: l, todos, onMarcarConferido, onRegis
       </div>
 
       <div className="section-label">Pontos de verificação</div>
+      <p className="screen-sub" style={{ margin: "-14px 0 16px 0" }}>Toque em uma foto para ver em tamanho maior.</p>
       {l.pontos.map((p) => (
-        <div key={p.nome} className="pt-item">
-          <span className="pt-name">{p.nome}</span>
-          {p.foto ? (
-            <span className="pt-status-ok"><CheckIcon /> {p.foto}</span>
-          ) : (
-            <span className="pt-status-off">sem foto</span>
+        <div key={p.nome} className="pt-item pt-item-foto">
+          <div className="pt-item-head">
+            <span className="pt-name">{p.nome}</span>
+            {p.foto ? (
+              <span className="pt-status-ok"><CheckIcon /> foto anexada</span>
+            ) : (
+              <span className="pt-status-off">sem foto</span>
+            )}
+          </div>
+          {p.foto && (
+            <a href={p.foto} target="_blank" rel="noreferrer">
+              <img className="pt-thumb" src={p.foto} alt={p.nome} />
+            </a>
           )}
         </div>
       ))}
@@ -180,6 +194,29 @@ export function FiscalDetalhe({ lancamento: l, todos, onMarcarConferido, onRegis
           <div className="obs-box">{l.observacao}</div>
         </>
       )}
+
+      {l.empresaKey === "pintura" && l.status === "pendencia" && (
+        <div className="pendencia-card">
+          <img src={IMG.pinturaMalFeita} alt="Exemplo de pintura com falha" />
+          <span>Este tipo de pendência costuma ser falha na demão de tinta ou respingo mal limpo — peça correção antes de aprovar.</span>
+        </div>
+      )}
+
+      <div className="section-label">Atividade recente</div>
+      <div className="timeline">
+        {[...l.eventos].reverse().map((ev, i, arr) => (
+          <div key={i} className="timeline-item">
+            <div className="timeline-marker">
+              <span className="timeline-dot" />
+              {i < arr.length - 1 && <span className="timeline-line" />}
+            </div>
+            <div className="timeline-body">
+              <span className="timeline-text">{ev.autor} {ev.acao}</span>
+              <span className="timeline-date">{ev.data}</span>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <div className="section-label">Histórico deste serviço · {l.bloco}/{l.apto}</div>
       {historico.map((h) => (

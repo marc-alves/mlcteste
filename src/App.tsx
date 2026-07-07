@@ -11,7 +11,7 @@ import {
   TerceiroSucesso,
 } from "./screens/Terceiro";
 import { FiscalNome, FiscalEmpresas, FiscalLista, FiscalDetalhe } from "./screens/Fiscal";
-import { LANCAMENTOS_INICIAIS, type Lancamento, type Status } from "./data";
+import { LANCAMENTOS_INICIAIS, criarEvento, type Evento, type Lancamento, type Status } from "./data";
 import { BACK_FLOW, NOVO_LANCAMENTO_VAZIO, type Screen, type NovoLancamentoState } from "./types";
 
 let seq = 6;
@@ -49,6 +49,13 @@ export default function App() {
   };
 
   const enviarLancamento = () => {
+    const jaExisteServico = lancamentos.some(
+      (l) => l.bloco === novo.bloco && l.apto === novo.apto && l.servicoKey === novo.servicoKey && l.empresaKey === novo.empresaKey
+    );
+    const evento = jaExisteServico
+      ? criarEvento(novo.nome, "subiu novas fotos")
+      : criarEvento(novo.nome, "criou o lançamento");
+
     const novoRegistro: Lancamento = {
       id: "L" + seq++,
       empresaKey: novo.empresaKey!,
@@ -61,6 +68,7 @@ export default function App() {
       observacao: novo.observacao,
       status: "pendente",
       notaFiscal: "",
+      eventos: [evento],
     };
     setLancamentos((ls) => [novoRegistro, ...ls]);
     go("terceiro-sucesso");
@@ -68,8 +76,10 @@ export default function App() {
 
   const currentLancamento = currentId ? lancamentos.find((l) => l.id === currentId) ?? null : null;
 
-  const updateLancamento = (id: string, update: Partial<Lancamento>) => {
-    setLancamentos((ls) => ls.map((l) => (l.id === id ? { ...l, ...update } : l)));
+  const updateLancamento = (id: string, update: Partial<Lancamento>, evento?: Evento) => {
+    setLancamentos((ls) =>
+      ls.map((l) => (l.id === id ? { ...l, ...update, eventos: evento ? [...l.eventos, evento] : l.eventos } : l))
+    );
   };
 
   return (
@@ -147,13 +157,13 @@ export default function App() {
             lancamento={currentLancamento}
             todos={lancamentos}
             onMarcarConferido={(nota) => {
-              updateLancamento(currentLancamento.id, { notaFiscal: nota, status: "conferido" });
+              updateLancamento(currentLancamento.id, { notaFiscal: nota, status: "conferido" }, criarEvento(fiscalNome, "conferiu o lançamento"));
             }}
             onRegistrarPendencia={(nota) => {
-              updateLancamento(currentLancamento.id, { notaFiscal: nota, status: "pendencia" });
+              updateLancamento(currentLancamento.id, { notaFiscal: nota, status: "pendencia" }, criarEvento(fiscalNome, "conferiu e registrou pendência"));
             }}
             onReabrirConferencia={() => {
-              updateLancamento(currentLancamento.id, { status: "pendente" });
+              updateLancamento(currentLancamento.id, { status: "pendente" }, criarEvento(fiscalNome, "reabriu a conferência"));
             }}
           />
         )}

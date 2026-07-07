@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { EMPRESAS } from "../data";
 import { CameraIcon, CheckIcon } from "../icons";
+import { BLOCO_IMAGENS, IMG } from "../images";
 import type { NovoLancamentoState } from "../types";
 
 type StepProps = {
@@ -40,7 +41,7 @@ export function TerceiroEmpresa({ novo, setNovo, onNext }: StepProps) {
     const sel = novo.empresaKey === key ? "selected" : "";
     return (
       <div key={key} className={`empresa-card ${sel}`} onClick={() => setNovo({ empresaKey: key, servicoKey: "" })}>
-        <div className={`empresa-dot ${e.corClasse}`} />
+        <img className="empresa-thumb" src={e.imagem} alt={e.nome} />
         <div>
           <strong>{e.nome}</strong>
           <span>{Object.keys(e.servicos).length} tipos de serviço</span>
@@ -74,11 +75,13 @@ export function TerceiroLocal({ novo, setNovo, onNext }: StepProps) {
     setNovo({ bloco: b, apto: a });
     onNext();
   };
+  const blocoImg = BLOCO_IMAGENS[bloco.trim().toUpperCase()];
   return (
     <>
       <div className="eyebrow">Passo 3 de 5</div>
       <h1 className="screen-title">Onde foi o serviço?</h1>
-      <p className="screen-sub">Informe o bloco e o apartamento do lançamento.</p>
+      <p className="screen-sub">Informe o bloco e o apartamento em que o serviço foi executado.</p>
+      {blocoImg && <img className="bloco-banner" src={blocoImg} alt={`Bloco ${bloco}`} />}
       <div className="field-row">
         <div>
           <label>Bloco</label>
@@ -134,8 +137,9 @@ export function TerceiroPontos({ novo, setNovo, onNext }: StepProps) {
   const servico = EMPRESAS[novo.empresaKey].servicos[novo.servicoKey];
 
   const anexarFoto = (i: number, files: FileList | null) => {
-    const nome = files && files[0] ? files[0].name : "foto.jpg";
-    const pontos = novo.pontos.map((p, idx) => (idx === i ? { ...p, foto: nome } : p));
+    if (!files || !files[0]) return;
+    const url = URL.createObjectURL(files[0]);
+    const pontos = novo.pontos.map((p, idx) => (idx === i ? { ...p, foto: url } : p));
     setNovo({ pontos });
   };
 
@@ -148,15 +152,16 @@ export function TerceiroPontos({ novo, setNovo, onNext }: StepProps) {
     <>
       <div className="eyebrow">Passo 5 de 5</div>
       <h1 className="screen-title">Pontos de verificação</h1>
-      <p className="screen-sub">Registre uma foto para cada ponto do serviço "{servico.nome}".</p>
+      <p className="screen-sub">Tire ou anexe uma foto para cada ponto do serviço "{servico.nome}" — é o que o arquiteto/engenheiro vai conferir.</p>
       {novo.pontos.map((p, i) => (
         <div key={p.nome} className="ponto-card">
           <div className="ponto-head">
             <strong>{p.nome}</strong>
             {p.foto && <span className="pt-status-ok"><CheckIcon /> anexada</span>}
           </div>
+          {p.foto && <img className="pt-thumb" src={p.foto} alt={p.nome} style={{ marginBottom: 10 }} />}
           <label className={`foto-btn ${p.foto ? "ok" : ""}`} htmlFor={`file${i}`}>
-            <CameraIcon /> {p.foto ? p.foto : "Anexar foto deste ponto"}
+            <CameraIcon /> {p.foto ? "Trocar foto" : "Anexar foto deste ponto"}
           </label>
           <input
             type="file"
@@ -185,10 +190,14 @@ export function TerceiroRevisao({ novo, onNext }: StepProps) {
   if (!novo.empresaKey) return null;
   const emp = EMPRESAS[novo.empresaKey];
   const serv = emp.servicos[novo.servicoKey];
+  const blocoImg = BLOCO_IMAGENS[novo.bloco.trim().toUpperCase()];
+  const semFoto = novo.pontos.some((p) => !p.foto);
   return (
     <>
       <div className="eyebrow">Confirmar antes de enviar</div>
       <h1 className="screen-title">Revisão do lançamento</h1>
+      <p className="screen-sub">Confira se está tudo certo — depois de enviado, o arquiteto/engenheiro vai ver este registro.</p>
+      {blocoImg && <img className="bloco-banner" src={blocoImg} alt={`Bloco ${novo.bloco}`} />}
       <div className="detail-header">
         <div className="reg-local">Bloco {novo.bloco} · Apto {novo.apto}</div>
         <div className="reg-meta">{emp.nome} — {serv.nome}</div>
@@ -196,15 +205,23 @@ export function TerceiroRevisao({ novo, onNext }: StepProps) {
       </div>
       <div className="section-label">Pontos de verificação</div>
       {novo.pontos.map((p) => (
-        <div key={p.nome} className="pt-item">
-          <span className="pt-name">{p.nome}</span>
-          {p.foto ? (
-            <span className="pt-status-ok"><CheckIcon /> {p.foto}</span>
-          ) : (
-            <span className="pt-status-off">sem foto</span>
-          )}
+        <div key={p.nome} className="pt-item pt-item-foto">
+          <div className="pt-item-head">
+            <span className="pt-name">{p.nome}</span>
+            {p.foto ? (
+              <span className="pt-status-ok"><CheckIcon /> foto anexada</span>
+            ) : (
+              <span className="pt-status-off">sem foto</span>
+            )}
+          </div>
+          {p.foto && <img className="pt-thumb" src={p.foto} alt={p.nome} />}
         </div>
       ))}
+      {semFoto && (
+        <div className="obs-box" style={{ background: "var(--danger-soft)", color: "var(--danger)" }}>
+          Atenção: ainda há pontos sem foto. Você pode enviar assim mesmo, mas o fiscal pode pedir para completar depois.
+        </div>
+      )}
       {novo.observacao && (
         <>
           <div className="section-label">Observação</div>
@@ -228,10 +245,11 @@ type SucessoProps = {
 export function TerceiroSucesso({ bloco, apto, onNovoLancamento, onVoltarInicio }: SucessoProps) {
   return (
     <div className="success-wrap">
+      <img className="success-emoji" src={IMG.emojiPedreiro} alt="Enviado" />
       <div className="success-stamp"><span>ENVIADO</span></div>
-      <h1 className="screen-title">Lançamento registrado</h1>
+      <h1 className="screen-title">Lançamento registrado!</h1>
       <p className="screen-sub">
-        Bloco {bloco}, apto {apto} — o arquiteto/engenheiro responsável poderá conferir este registro.
+        Bloco {bloco}, apto {apto} — recebemos suas fotos e o arquiteto/engenheiro responsável já pode conferir este registro.
       </p>
       <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
         <button className="btn btn-primary" onClick={onNovoLancamento}>Novo lançamento</button>
