@@ -4,7 +4,8 @@ import { Home } from "./screens/Home";
 import {
   TerceiroNome,
   TerceiroEmpresa,
-  TerceiroFeed,
+  TerceiroHome,
+  TerceiroRegistro,
   TerceiroLocal,
   TerceiroServico,
   TerceiroPontos,
@@ -32,6 +33,7 @@ export default function App() {
   const [filtroEmpresa, setFiltroEmpresa] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<"todos" | Status>("todos");
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [terceiroRegistroId, setTerceiroRegistroId] = useState<string | null>(null);
 
   const go = (s: Screen) => {
     setScreen(s);
@@ -47,6 +49,7 @@ export default function App() {
     setFiltroEmpresa(null);
     setFiltroStatus("todos");
     setCurrentId(null);
+    setTerceiroRegistroId(null);
   };
 
   const enviarLancamento = () => {
@@ -76,6 +79,7 @@ export default function App() {
   };
 
   const currentLancamento = currentId ? lancamentos.find((l) => l.id === currentId) ?? null : null;
+  const terceiroLancamento = terceiroRegistroId ? lancamentos.find((l) => l.id === terceiroRegistroId) ?? null : null;
 
   const updateLancamento = (id: string, update: Partial<Lancamento>, evento?: Evento) => {
     setLancamentos((ls) =>
@@ -95,10 +99,22 @@ export default function App() {
           <TerceiroNome novo={novo} setNovo={setNovo} onNext={() => go("terceiro-empresa")} />
         )}
         {screen === "terceiro-empresa" && (
-          <TerceiroEmpresa novo={novo} setNovo={setNovo} onNext={() => go("terceiro-feed")} />
+          <TerceiroEmpresa novo={novo} setNovo={setNovo} onNext={() => go("terceiro-home")} />
         )}
-        {screen === "terceiro-feed" && (
-          <TerceiroFeed novo={novo} setNovo={setNovo} onNext={() => go("terceiro-local")} />
+        {screen === "terceiro-home" && (
+          <TerceiroHome
+            novo={novo}
+            setNovo={setNovo}
+            lancamentos={lancamentos}
+            onNext={() => go("terceiro-local")}
+            onAbrirRegistro={(id) => {
+              setTerceiroRegistroId(id);
+              go("terceiro-registro");
+            }}
+          />
+        )}
+        {screen === "terceiro-registro" && terceiroLancamento && (
+          <TerceiroRegistro lancamento={terceiroLancamento} />
         )}
         {screen === "terceiro-local" && (
           <TerceiroLocal novo={novo} setNovo={setNovo} onNext={() => go("terceiro-servico")} />
@@ -118,7 +134,7 @@ export default function App() {
             apto={novo.apto}
             onNovoLancamento={() => {
               setNovo({ bloco: "", apto: "", servicoKey: "", pontos: [], observacao: "" });
-              go("terceiro-empresa");
+              go("terceiro-home");
             }}
             onVoltarInicio={resetTudo}
           />

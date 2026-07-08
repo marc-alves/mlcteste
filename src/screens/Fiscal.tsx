@@ -204,7 +204,7 @@ export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: Fisc
 
 const FILTROS: { k: "todos" | Status; label: string }[] = [
   { k: "todos", label: "Todos" },
-  { k: "pendente", label: "Pendente" },
+  { k: "pendente", label: "Verificar" },
   { k: "conferido", label: "Conferido" },
   { k: "pendencia", label: "Com pendência" },
 ];

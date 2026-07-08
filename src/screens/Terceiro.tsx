@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { EMPRESAS, FEED_MOCK } from "../data";
-import { CameraIcon, CheckIcon } from "../icons";
+import { EMPRESAS, FEED_MOCK, STATUS_LABEL, type Lancamento } from "../data";
+import { CameraIcon, CheckIcon, EmptyIcon } from "../icons";
 import { BLOCO_IMAGENS, IMG } from "../images";
 import type { NovoLancamentoState } from "../types";
 
@@ -62,15 +62,84 @@ export function TerceiroEmpresa({ novo, setNovo, onNext }: StepProps) {
   );
 }
 
-export function TerceiroFeed({ novo, onNext }: StepProps) {
+type TerceiroHomeProps = StepProps & {
+  lancamentos: Lancamento[];
+  onAbrirRegistro: (id: string) => void;
+};
+
+export function TerceiroHome({ novo, lancamentos, onNext, onAbrirRegistro }: TerceiroHomeProps) {
   if (!novo.empresaKey) return null;
   const emp = EMPRESAS[novo.empresaKey];
+  const meus = lancamentos
+    .filter((l) => l.empresaKey === novo.empresaKey && l.terceiroNome === novo.nome)
+    .sort((a, b) => b.id.localeCompare(a.id));
+  const validados = meus.filter((l) => l.status === "conferido").length;
   const feed = FEED_MOCK[novo.empresaKey] ?? [];
+  const entreguesEquipe = lancamentos.filter((l) => l.empresaKey === novo.empresaKey).length;
+  const pctMeta = Math.min(100, Math.round((entreguesEquipe / emp.metaMensalComodos) * 100));
+
   return (
     <>
-      <div className="eyebrow">{emp.nome}</div>
-      <h1 className="screen-title">O que a equipe já lançou</h1>
-      <p className="screen-sub">Últimos registros de outros prestadores da {emp.nome}, só pra você ter uma ideia do andamento da obra.</p>
+      <div className="eyebrow">Olá, {novo.nome.split(" ")[0]}</div>
+      <h1 className="screen-title">{emp.nome}</h1>
+      <p className="screen-sub">Seu histórico nesta empresa e o que a equipe já lançou na obra.</p>
+
+      <div className="area-block">
+      <h2 className="area-title">Você</h2>
+
+      <div className="kpi-row">
+        <div className="kpi-card">
+          <span className="kpi-value">{meus.length}</span>
+          <span className="kpi-label">seus lançamentos</span>
+        </div>
+        <div className="kpi-card">
+          <span className="kpi-value">{validados}</span>
+          <span className="kpi-label">validados pelo arquiteto</span>
+        </div>
+      </div>
+
+      <div className="section-label">Seus registros</div>
+      {meus.length === 0 ? (
+        <div className="empty-state">
+          <EmptyIcon />
+          <div>Você ainda não lançou nenhum serviço aqui.</div>
+        </div>
+      ) : (
+        meus.map((l) => {
+          const serv = emp.servicos[l.servicoKey];
+          return (
+            <div key={l.id} className={`reg-card reg-card-${l.status}`} onClick={() => onAbrirRegistro(l.id)}>
+              <div className="reg-top">
+                <div style={{ flex: 1 }}>
+                  <div className="reg-local">Bloco {l.bloco} · Apto {l.apto}</div>
+                  <div className="reg-meta">{serv.nome}</div>
+                </div>
+                <span className={`stamp ${l.status}`}>{STATUS_LABEL[l.status]}</span>
+              </div>
+              <div className="reg-data">{l.data}</div>
+            </div>
+          );
+        })
+      )}
+      </div>
+
+      <div className="area-divider" />
+
+      <div className="area-block">
+      <h2 className="area-title">Equipe</h2>
+
+      <div className="section-label">Meta do mês</div>
+      <div className="progress-item">
+        <div className="progress-item-head">
+          <span className="progress-item-label">Cômodos entregues</span>
+          <span className="progress-item-frac">{entreguesEquipe}/{emp.metaMensalComodos}</span>
+        </div>
+        <div className="progress-bar-track">
+          <div className="progress-bar-fill" style={{ width: `${pctMeta}%` }} />
+        </div>
+      </div>
+
+      <div className="section-label">O que a equipe já lançou</div>
       {feed.map((f, i) => (
         <div key={i} className="feed-card">
           <img className="feed-thumb" src={f.foto} alt={f.servico} />
@@ -81,9 +150,70 @@ export function TerceiroFeed({ novo, onNext }: StepProps) {
           </div>
         </div>
       ))}
-      <div className="bottombar">
-        <button className="btn btn-primary" onClick={onNext}>Continuar meu lançamento</button>
       </div>
+
+      <div className="bottombar">
+        <button className="btn btn-primary" onClick={onNext}>Novo lançamento</button>
+      </div>
+    </>
+  );
+}
+
+type TerceiroRegistroProps = { lancamento: Lancamento };
+
+export function TerceiroRegistro({ lancamento: l }: TerceiroRegistroProps) {
+  const emp = EMPRESAS[l.empresaKey];
+  const serv = emp.servicos[l.servicoKey];
+  const blocoImg = BLOCO_IMAGENS[l.bloco];
+
+  return (
+    <>
+      {blocoImg && <img className="bloco-banner" src={blocoImg} alt={`Bloco ${l.bloco}`} />}
+      <div className="detail-header">
+        <div className="reg-top" style={{ marginBottom: 0 }}>
+          <div>
+            <div className="reg-local">Bloco {l.bloco} · Apto {l.apto}</div>
+            <div className="reg-meta">{emp.nome} — {serv.nome}</div>
+            <div className="reg-meta">{l.data}</div>
+          </div>
+          <span className={`stamp ${l.status}`}>{STATUS_LABEL[l.status]}</span>
+        </div>
+      </div>
+
+      <div className="obs-box" style={l.status === "conferido" ? { color: "var(--primary-dark)" } : undefined}>
+        {l.status === "conferido" && "Validado pelo arquiteto."}
+        {l.status === "pendente" && "Falta o arquiteto validar este lançamento."}
+        {l.status === "pendencia" && "O arquiteto apontou um impedimento neste lançamento — veja a nota abaixo."}
+      </div>
+
+      {l.notaFiscal && (
+        <>
+          <div className="section-label">Nota do arquiteto</div>
+          <div className="obs-box">{l.notaFiscal}</div>
+        </>
+      )}
+
+      <div className="section-label">Pontos de verificação</div>
+      {l.pontos.map((p) => (
+        <div key={p.nome} className="pt-item pt-item-foto">
+          <div className="pt-item-head">
+            <span className="pt-name">{p.nome}</span>
+            {p.foto ? (
+              <span className="pt-status-ok"><CheckIcon /> foto anexada</span>
+            ) : (
+              <span className="pt-status-off">sem foto</span>
+            )}
+          </div>
+          {p.foto && <img className="pt-thumb" src={p.foto} alt={p.nome} />}
+        </div>
+      ))}
+
+      {l.observacao && (
+        <>
+          <div className="section-label">Sua observação</div>
+          <div className="obs-box">{l.observacao}</div>
+        </>
+      )}
     </>
   );
 }

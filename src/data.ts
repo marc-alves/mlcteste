@@ -8,6 +8,7 @@ export type Empresa = {
   nome: string;
   corClasse: string;
   imagem: string;
+  metaMensalComodos: number; // meta de cômodos a entregar no mês, usada na barra de progresso da equipe
   servicos: Record<string, Servico>;
 };
 
@@ -16,6 +17,7 @@ export const EMPRESAS: Record<string, Empresa> = {
     nome: "Melhor Gesso",
     corClasse: "gesso",
     imagem: IMG.logoGesso,
+    metaMensalComodos: 30,
     servicos: {
       teto: { nome: "100 · Gesso — Teto", pontos: ["Vista geral do teto", "Canto esquerdo", "Canto direito", "Acabamento da sanca"] },
       sanca: { nome: "200 · Gesso — Sanca", pontos: ["Sanca da sala", "Sanca do quarto", "Emenda e acabamento"] },
@@ -26,6 +28,7 @@ export const EMPRESAS: Record<string, Empresa> = {
     nome: "Pintura Total",
     corClasse: "pintura",
     imagem: IMG.logoPintura,
+    metaMensalComodos: 25,
     servicos: {
       geral: { nome: "100 · Pintura — Geral", pontos: ["Parede principal", "Teto", "Rodapé"] },
       cozinha: { nome: "200 · Pintura — Cozinha", pontos: ["Vista da porta", "Vista da janela", "Lavanderia"] },
@@ -145,7 +148,7 @@ export const LANCAMENTOS_INICIAIS: Lancamento[] = [
 ];
 
 export const STATUS_LABEL: Record<Status, string> = {
-  pendente: "Pendente",
+  pendente: "Verificar",
   conferido: "Conferido",
   pendencia: "Com pendência",
 };
