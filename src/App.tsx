@@ -13,7 +13,8 @@ import {
   TerceiroSucesso,
 } from "./screens/Terceiro";
 import { FiscalNome, FiscalEmpresas, FiscalLista, FiscalDetalhe } from "./screens/Fiscal";
-import { LANCAMENTOS_INICIAIS, criarEvento, type Evento, type Lancamento, type Status } from "./data";
+import { LimpezaPainel, LimpezaDetalhe } from "./screens/Limpeza";
+import { LANCAMENTOS_INICIAIS, LIMPEZAS_INICIAIS, criarEvento, type Evento, type Lancamento, type Status } from "./data";
 import { BACK_FLOW, NOVO_LANCAMENTO_VAZIO, type Screen, type NovoLancamentoState } from "./types";
 
 let seq = 6;
@@ -34,6 +35,7 @@ export default function App() {
   const [filtroStatus, setFiltroStatus] = useState<"todos" | Status>("todos");
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [terceiroRegistroId, setTerceiroRegistroId] = useState<string | null>(null);
+  const [limpezaId, setLimpezaId] = useState<string | null>(null);
 
   const go = (s: Screen) => {
     setScreen(s);
@@ -50,6 +52,7 @@ export default function App() {
     setFiltroStatus("todos");
     setCurrentId(null);
     setTerceiroRegistroId(null);
+    setLimpezaId(null);
   };
 
   const enviarLancamento = () => {
@@ -80,6 +83,7 @@ export default function App() {
 
   const currentLancamento = currentId ? lancamentos.find((l) => l.id === currentId) ?? null : null;
   const terceiroLancamento = terceiroRegistroId ? lancamentos.find((l) => l.id === terceiroRegistroId) ?? null : null;
+  const limpezaAtual = limpezaId ? LIMPEZAS_INICIAIS.find((l) => l.id === limpezaId) ?? null : null;
 
   const updateLancamento = (id: string, update: Partial<Lancamento>, evento?: Evento) => {
     setLancamentos((ls) =>
@@ -158,7 +162,19 @@ export default function App() {
               setFiltroStatus("todos");
               go("fiscal-lista");
             }}
+            onAbrirLimpeza={() => go("fiscal-limpeza")}
           />
+        )}
+        {screen === "fiscal-limpeza" && (
+          <LimpezaPainel
+            onAbrirDetalhe={(id) => {
+              setLimpezaId(id);
+              go("fiscal-limpeza-detalhe");
+            }}
+          />
+        )}
+        {screen === "fiscal-limpeza-detalhe" && limpezaAtual && (
+          <LimpezaDetalhe limpeza={limpezaAtual} />
         )}
         {screen === "fiscal-lista" && filtroEmpresa && (
           <FiscalLista

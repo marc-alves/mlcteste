@@ -253,3 +253,118 @@ export const FEED_MOCK: Record<string, FeedItem[]> = {
     { autor: "Marina Lopes", bloco: "A", apto: "305", servico: "400 · Pintura — Quarto", foto: IMG.pinturaOk, tempo: "ontem" },
   ],
 };
+
+// --- Módulo de limpeza de apartamentos ---------------------------------
+// Visão do arquiteto/engenheiro é somente-leitura (RF08): o app ainda não
+// tem um perfil de "Gestão" para criar limpezas, marcar presença ou
+// redistribuir — por isso só o painel de consulta (RF06/RF07) é mockado.
+
+export type TipoLimpezaKey = "grossa" | "fina";
+
+export const TIPOS_LIMPEZA: Record<TipoLimpezaKey, string> = {
+  grossa: "Limpeza Grossa (pós-obra)",
+  fina: "Limpeza Fina (acabamento)",
+};
+
+// Template padrão de materiais por tipo de limpeza (RF02). Editável só via
+// "administração" — aqui fixo, pois o módulo de gestão ainda não existe.
+export const TEMPLATES_MATERIAIS: Record<TipoLimpezaKey, string[]> = {
+  grossa: [
+    "Vassoura e rodo",
+    "Sacos de lixo resistentes (entulho)",
+    "Espátula/raspador (resíduo de cimento/tinta)",
+    "Pano multiuso e balde",
+    "Desincrustante",
+  ],
+  fina: [
+    "Detergente neutro",
+    "Água sanitária",
+    "Álcool 70%",
+    "Limpa-vidros",
+    "Multiuso",
+    "Pano de microfibra",
+    "Esponja dupla-face",
+    "Luvas",
+  ],
+};
+
+export const FUNCIONARIAS_LIMPEZA: string[] = ["Marta Silva", "Rosa Pereira", "Lúcia Fernandes", "Débora Santos"];
+
+// O arquiteto precisa lembrar de solicitar ao almoxarifado — "a_solicitar"
+// existe pra isso, como um lembrete visual (não é um alerta: é o normal no
+// início do dia, ainda dá tempo). Depois disso, quem retira o material é a
+// própria colaboradora, por conta própria, sem intermediário: a retirada é
+// um autorrelato dela, então até ter `retiradoEm` preenchido não há
+// confirmação de que ela buscou. "Em andamento" é quando ela já está
+// executando a limpeza em si (depois de retirar o material).
+export type StatusLimpeza = "a_solicitar" | "solicitado" | "retirado" | "em_andamento";
+
+export const STATUS_LIMPEZA_LABEL: Record<StatusLimpeza, string> = {
+  a_solicitar: "Falta solicitar",
+  solicitado: "Aguardando retirada",
+  retirado: "Retirado pela colaboradora",
+  em_andamento: "Em andamento",
+};
+
+export type PeriodoDia = "manha" | "tarde";
+
+export const PERIODO_DIA_LABEL: Record<PeriodoDia, string> = {
+  manha: "Manhã",
+  tarde: "Tarde",
+};
+
+export type Limpeza = {
+  id: string;
+  bloco: string;
+  apto: string;
+  tipo: TipoLimpezaKey;
+  funcionaria: string;
+  data: string; // dd/mm/aaaa
+  diaSemana: string; // calculado a partir de `data` (RF04)
+  periodo: PeriodoDia;
+  status: StatusLimpeza;
+  retiradoEm?: string; // preenchido quando a colaboradora confirma a retirada
+  pendenteRedistribuicao?: boolean;
+};
+
+const DIAS_SEMANA = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+function diaSemana(dataBr: string): string {
+  const [d, m, y] = dataBr.split("/").map(Number);
+  return DIAS_SEMANA[new Date(y, m - 1, d).getDay()];
+}
+
+function criarLimpeza(base: Omit<Limpeza, "diaSemana">): Limpeza {
+  return { ...base, diaSemana: diaSemana(base.data) };
+}
+
+export const LIMPEZAS_INICIAIS: Limpeza[] = [
+  criarLimpeza({
+    id: "LZ0", bloco: "A", apto: "201", tipo: "grossa", funcionaria: "Lúcia Fernandes", data: "08/07/2026",
+    periodo: "manha", status: "a_solicitar",
+  }),
+  criarLimpeza({
+    id: "LZ1", bloco: "B", apto: "304", tipo: "grossa", funcionaria: "Marta Silva", data: "06/07/2026",
+    periodo: "manha", status: "retirado", retiradoEm: "06/07/2026 07:40",
+  }),
+  criarLimpeza({
+    id: "LZ2", bloco: "A", apto: "112", tipo: "fina", funcionaria: "Rosa Pereira", data: "06/07/2026",
+    periodo: "manha", status: "em_andamento", retiradoEm: "06/07/2026 08:10",
+  }),
+  criarLimpeza({
+    id: "LZ3", bloco: "C", apto: "208", tipo: "fina", funcionaria: "Lúcia Fernandes", data: "07/07/2026",
+    periodo: "tarde", status: "solicitado", pendenteRedistribuicao: true,
+  }),
+  criarLimpeza({
+    id: "LZ4", bloco: "B", apto: "210", tipo: "grossa", funcionaria: "Débora Santos", data: "07/07/2026",
+    periodo: "tarde", status: "em_andamento", retiradoEm: "07/07/2026 07:55",
+  }),
+  criarLimpeza({
+    id: "LZ5", bloco: "A", apto: "305", tipo: "fina", funcionaria: "Marta Silva", data: "05/07/2026",
+    periodo: "manha", status: "retirado", retiradoEm: "05/07/2026 07:30",
+  }),
+  criarLimpeza({
+    id: "LZ6", bloco: "C", apto: "108", tipo: "grossa", funcionaria: "Rosa Pereira", data: "03/07/2026",
+    periodo: "manha", status: "retirado", retiradoEm: "03/07/2026 07:20",
+  }),
+];

@@ -133,12 +133,14 @@
     background:var(--accent-soft);color:var(--ink);border:1px solid var(--accent);
   }
   .mini-badge-erro{background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger);}
+  .mini-badge-neutro{background:var(--bg);color:var(--ink-soft);border:1px solid var(--line);}
   .empresa-dot{width:38px;height:38px;border-radius:9px;flex-shrink:0;}
   .empresa-dot.gesso{background:#8FA79A;}
   .empresa-dot.pintura{background:#C9A24C;}
   .empresa-dot.janela{background:#7FA8C9;}
   .empresa-dot.vasos{background:#B99CC9;}
   .empresa-dot.pia{background:#C98F72;}
+  .empresa-dot.limpeza{background:#7FC4B8;}
   .empresa-thumb{width:44px;height:44px;border-radius:10px;flex-shrink:0;object-fit:cover;}
   .empresa-tag{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px;}
   .empresa-card strong{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;}
@@ -194,6 +196,9 @@
   .modal-title{font-size:17px;font-weight:700;margin:0 0 8px 0;}
   .modal-text{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 18px 0;}
   .modal-card .btn-row{margin-bottom:0;}
+  .tour-dots{display:flex;justify-content:center;gap:6px;margin-bottom:18px;}
+  .tour-dot{width:6px;height:6px;border-radius:50%;background:var(--line);}
+  .tour-dot.active{background:var(--primary);}
 
   /* Imagens de bloco */
   .bloco-banner{width:100%;height:150px;object-fit:cover;border-radius:var(--radius);margin-bottom:18px;display:block;}
@@ -257,11 +262,19 @@
   .stamp.pendente{color:#6B7269;background:#E7E9E5;border:1px solid #D3D7D0;}
   .stamp.conferido{color:#1F4D3D;background:#DCEBE2;border:1px solid #BBDBC8;}
   .stamp.pendencia{color:#8A3524;background:#F5DFD6;border:1px solid #E9BCA9;}
+  .stamp.a_solicitar{color:#2E5C8A;background:#DCE8F5;border:1px solid #B9D3EA;}
+  .stamp.solicitado{color:#6B7269;background:#E7E9E5;border:1px solid #D3D7D0;}
+  .stamp.em_andamento{color:#8A6D1F;background:#F3E9CE;border:1px solid #D9BB57;}
+  .stamp.retirado{color:#1F4D3D;background:#DCEBE2;border:1px solid #BBDBC8;}
 
   /* Tonalidade leve por status nos cards da lista */
   .reg-card-pendente{background:#F4F5F3;}
   .reg-card-conferido{background:#FFFFFF;border-color:#CFE3D7;}
   .reg-card-pendencia{background:#FBF3F0;border-color:#E9BCA9;}
+  .reg-card-a_solicitar{background:#EAF2FA;border-color:#B9D3EA;}
+  .reg-card-solicitado{background:#F4F5F3;}
+  .reg-card-em_andamento{background:#FBF6E9;border-color:#D9BB57;}
+  .reg-card-retirado{background:#FFFFFF;border-color:#CFE3D7;}
 
   /* Lista Fiscal */
   .filtros{display:flex;gap:8px;margin-bottom:18px;}
@@ -279,6 +292,10 @@
   .reg-local{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--ink);}
   .reg-meta{font-size:13px;color:var(--ink-soft);margin-bottom:2px;}
   .reg-data{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-faint);}
+  .dia-chip{
+    display:inline-block;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:700;
+    color:var(--primary-dark);margin-bottom:4px;
+  }
 
   .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);}
   .empty-state svg{margin-bottom:14px;color:var(--ink-faint);}
@@ -319,6 +336,13 @@
   .timeline-item:last-child .timeline-body{padding-bottom:2px;}
   .timeline-text{font-size:13.5px;color:var(--ink);line-height:1.4;}
   .timeline-date{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);white-space:nowrap;flex-shrink:0;padding-top:1px;}
+  .timeline-dot-pending{background:var(--ink-faint);opacity:0.5;}
+  .timeline-text-pending{color:var(--ink-faint);}
+
+  /* Lista simples de materiais (limpeza) */
+  .material-item{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-soft);}
+  .material-item:last-child{border-bottom:none;}
+  .material-bullet{width:5px;height:5px;border-radius:50%;background:var(--ink-faint);flex-shrink:0;}
 
   /* Feed de atividade da equipe (terceiro) */
   .feed-card{
@@ -365,10 +389,19 @@
   body.dark .stamp.pendente{color:#B7BDB8;background:#242C28;border-color:#3A423C;}
   body.dark .stamp.conferido{color:#8FD6B2;background:#1B3327;border-color:#2E5A43;}
   body.dark .stamp.pendencia{color:#F0A98C;background:#3A241D;border-color:#5C3729;}
+  body.dark .stamp.a_solicitar{color:#8FC1F0;background:#182838;border-color:#2A425C;}
+  body.dark .stamp.solicitado{color:#B7BDB8;background:#242C28;border-color:#3A423C;}
+  body.dark .stamp.em_andamento{color:#D9BB57;background:#332B18;border-color:#5C4E28;}
+  body.dark .stamp.retirado{color:#8FD6B2;background:#1B3327;border-color:#2E5A43;}
+  body.dark .reg-card-a_solicitar{background:#111C28;border-color:#2A425C;}
+  body.dark .reg-card-solicitado{background:#151C18;}
+  body.dark .reg-card-em_andamento{background:#20190D;border-color:#5C4E28;}
+  body.dark .reg-card-retirado{background:var(--surface);border-color:#2E5A43;}
   body.dark .reg-card-pendente{background:#151C18;}
   body.dark .reg-card-conferido{background:var(--surface);border-color:#2E5A43;}
   body.dark .reg-card-pendencia{background:#20140F;border-color:#5C3729;}
   body.dark .detail-header .reg-meta{color:#8FD6B2;}
+  body.dark .dia-chip{color:#8FD6B2;}
   body.dark .success-stamp span{color:#8FD6B2;}
 
   .theme-btn{

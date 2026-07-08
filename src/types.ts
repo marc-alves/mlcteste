@@ -14,7 +14,9 @@ export type Screen =
   | "fiscal-nome"
   | "fiscal-empresas"
   | "fiscal-lista"
-  | "fiscal-detalhe";
+  | "fiscal-detalhe"
+  | "fiscal-limpeza"
+  | "fiscal-limpeza-detalhe";
 
 export type NovoLancamentoState = {
   nome: string;
@@ -49,6 +51,8 @@ export const BACK_FLOW: Partial<Record<Screen, Screen>> = {
   "fiscal-empresas": "fiscal-nome",
   "fiscal-lista": "fiscal-empresas",
   "fiscal-detalhe": "fiscal-lista",
+  "fiscal-limpeza": "fiscal-empresas",
+  "fiscal-limpeza-detalhe": "fiscal-limpeza",
 };
 
 export const SCREEN_LABELS: Record<Screen, string> = {
@@ -66,4 +70,6 @@ export const SCREEN_LABELS: Record<Screen, string> = {
   "fiscal-empresas": "Fiscalização",
   "fiscal-lista": "Fiscalização",
   "fiscal-detalhe": "Registro",
+  "fiscal-limpeza": "Limpeza",
+  "fiscal-limpeza-detalhe": "Limpeza",
 };

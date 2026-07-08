@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { EMPRESAS, EMPRESAS_VALIDADAS, RESUMO_MENSAL, STATUS_LABEL, type EmpresaValidada, type Lancamento, type Status } from "../data";
+import { EMPRESAS, EMPRESAS_VALIDADAS, LIMPEZAS_INICIAIS, RESUMO_MENSAL, STATUS_LABEL, type EmpresaValidada, type Lancamento, type Status } from "../data";
 import { AlertIcon, CheckIcon, ChevronDownIcon, EmptyIcon, LockIcon } from "../icons";
 import { BLOCO_IMAGENS, IMG } from "../images";
 
@@ -36,9 +36,10 @@ type FiscalEmpresasProps = {
   fiscalNome: string;
   lancamentos: Lancamento[];
   onAbrirEmpresa: (key: string) => void;
+  onAbrirLimpeza: () => void;
 };
 
-export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: FiscalEmpresasProps) {
+export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa, onAbrirLimpeza }: FiscalEmpresasProps) {
   const [empresaValidada, setEmpresaValidada] = useState<EmpresaValidada | null>(null);
   const [solicitado, setSolicitado] = useState(false);
   const meses = Object.keys(RESUMO_MENSAL);
@@ -150,6 +151,28 @@ export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: Fisc
           </div>
         );
       })}
+
+      <div className="subsection-title"><span className="subsection-bar" />Limpeza</div>
+      <div className="empresa-card destaque" onClick={onAbrirLimpeza}>
+        <div className="empresa-dot limpeza" />
+        <div>
+          <span className="empresa-tag">Painel</span>
+          <strong>Gerenciar limpeza</strong>
+          <div className="empresa-meta">
+            <span className="empresa-meta-line">{LIMPEZAS_INICIAIS.length} registros no painel</span>
+            {LIMPEZAS_INICIAIS.some((l) => l.status === "a_solicitar") && (
+              <span className="mini-badge mini-badge-neutro">
+                {LIMPEZAS_INICIAIS.filter((l) => l.status === "a_solicitar").length} falta solicitar
+              </span>
+            )}
+            {LIMPEZAS_INICIAIS.some((l) => l.pendenteRedistribuicao) && (
+              <span className="mini-badge mini-badge-erro">
+                {LIMPEZAS_INICIAIS.filter((l) => l.pendenteRedistribuicao).length} pendente de redistribuição
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className="subsection-title"><span className="subsection-bar" />Registros já validados</div>
       <p className="screen-sub" style={{ marginTop: -10 }}>

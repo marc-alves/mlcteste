@@ -14,8 +14,8 @@ export const IMG = {
   pinturaMalFeita: "https://media.licdn.com/dms/image/v2/C5612AQFMKNvSjUM0yQ/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1593638741960?e=2147483647&v=beta&t=dl9N0UuQD6aMMcXPCNZOPnb6gpL_2heSFv5cc-yiPyQ",
   paredeBrancaSala: "https://i.pinimg.com/736x/06/d6/69/06d669c327a33a07dc40c6917b0a2b03.jpg",
 
-  emojiArquiteta: "https://images.emojiterra.com/google/android-10/512px/1f477-2640.png",
-  emojiPedreiro: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbsNuc0sk03-FxLw1RC7c5IbMFJq35yH_39lPoyh8Kzw&s=10v",
+  emojiArquiteta: "https://thumbs.dreamstime.com/b/arquiteto-que-prev%C3%AA-o-seu-projeto-34468141.jpg",
+  emojiPedreiro: "https://images.tcdn.com.br/img/img_prod/473441/kit_ferramentas_pedreiro_completo_707607217_1_20181218172354.jpg",
 
   // easter egg: foto solta que "por acaso" foi parar no meio dos lançamentos.
   fotoMisteriosa: "https://i.pinimg.com/236x/12/98/0f/12980f9b45cf3660e848ca2b70f29621.jpg",
