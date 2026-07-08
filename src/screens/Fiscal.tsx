@@ -127,18 +127,25 @@ export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: Fisc
       {Object.keys(EMPRESAS).map((key) => {
         const e = EMPRESAS[key];
         const regs = lancamentos.filter((l) => l.empresaKey === key);
+        const concluidos = regs.filter((l) => l.status === "conferido").length;
         const pendentes = regs.filter((l) => l.status === "pendente").length;
+        const comPendencia = regs.filter((l) => l.status === "pendencia").length;
         return (
           <div key={key} className="empresa-card destaque" onClick={() => onAbrirEmpresa(key)}>
             <img className="empresa-thumb" src={e.imagem} alt={e.nome} />
             <div>
+              <span className="empresa-tag">Empresa</span>
               <strong>{e.nome}</strong>
-              <span>
-                <strong className="empresa-count">{regs.length}</strong> lançamento{regs.length === 1 ? "" : "s"}
+              <div className="empresa-meta">
+                <span className="empresa-meta-line"><span className="empresa-count">{regs.length}</span> lançamento{regs.length === 1 ? "" : "s"}</span>
+                <span className="empresa-meta-line">{concluidos} concluído{concluidos === 1 ? "" : "s"}</span>
                 {pendentes > 0 && (
                   <span className="mini-badge mini-badge-atencao">{pendentes} pendente{pendentes === 1 ? "" : "s"} de conferência</span>
                 )}
-              </span>
+                {comPendencia > 0 && (
+                  <span className="mini-badge mini-badge-erro">{comPendencia} com impedimento</span>
+                )}
+              </div>
             </div>
           </div>
         );
@@ -329,7 +336,7 @@ export function FiscalDetalhe({ lancamento: l, todos, onMarcarConferido, onRegis
       {l.empresaKey === "pintura" && l.status === "pendencia" && (
         <div className="pendencia-card">
           <img src={IMG.pinturaMalFeita} alt="Exemplo de pintura com falha" />
-          <span>Este tipo de pendência costuma ser falha na demão de tinta ou respingo mal limpo — peça correção antes de aprovar.</span>
+          <span>Impedimento por falta de material — o serviço fica parado até a reposição chegar. Acompanhe o almoxarifado antes de cobrar o terceiro.</span>
         </div>
       )}
 

@@ -20,6 +20,9 @@ export const IMG = {
   // easter egg: foto solta que "por acaso" foi parar no meio dos lançamentos.
   fotoMisteriosa: "https://i.pinimg.com/236x/12/98/0f/12980f9b45cf3660e848ca2b70f29621.jpg",
 
+  logoGesso: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS17yzo0jWuL0vWjZufODjtJ1Ja9hrB_sGhLgmSgZPILwtKezdjbPKRQnKR&s=10",
+  logoPintura: "https://thumbs.dreamstime.com/b/logotipo-home-do-reparo-da-pintura-91498642.jpg",
+
   esquadriasRocha: "https://img.magnific.com/vetores-gratis/logotipo-da-empresa-de-construcao-de-design-plano_23-2150051909.jpg?semt=ais_hybrid&w=740&q=80",
   metaisVaz: "https://img.magnific.com/vetores-premium/desenho-simples-do-logotipo-da-empresa-de-construcao_278222-8246.jpg?semt=ais_hybrid&w=740&q=80",
   marcenariaLopes: "https://www.designevo.com/res/templates/thumb_small/simple-construction-letter-m-a.webp",

@@ -124,12 +124,15 @@
   .empresa-card.selected{border-color:var(--primary); background:var(--primary-soft);}
   .empresa-card.destaque{border-color:var(--primary-soft);box-shadow:var(--shadow);}
   .empresa-card.destaque:active{background:var(--primary-soft);}
-  .empresa-count{color:var(--ink);}
+  .empresa-count{display:inline;color:var(--ink);font-weight:700;}
+  .empresa-meta{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:4px;}
+  .empresa-meta-line{display:block;}
   .mini-badge{
     display:inline-flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
-    padding:2px 8px;border-radius:20px;margin-left:8px;white-space:nowrap;
+    padding:2px 8px;border-radius:20px;white-space:nowrap;
     background:var(--accent-soft);color:var(--ink);border:1px solid var(--accent);
   }
+  .mini-badge-erro{background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger);}
   .empresa-dot{width:38px;height:38px;border-radius:9px;flex-shrink:0;}
   .empresa-dot.gesso{background:#8FA79A;}
   .empresa-dot.pintura{background:#C9A24C;}
@@ -137,6 +140,7 @@
   .empresa-dot.vasos{background:#B99CC9;}
   .empresa-dot.pia{background:#C98F72;}
   .empresa-thumb{width:44px;height:44px;border-radius:10px;flex-shrink:0;object-fit:cover;}
+  .empresa-tag{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px;}
   .empresa-card strong{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;}
   .empresa-card span{font-size:12.5px;color:var(--ink-soft);}
   .empresa-card.locked{

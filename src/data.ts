@@ -15,7 +15,7 @@ export const EMPRESAS: Record<string, Empresa> = {
   gesso: {
     nome: "Melhor Gesso",
     corClasse: "gesso",
-    imagem: IMG.gessoInstalando,
+    imagem: IMG.logoGesso,
     servicos: {
       teto: { nome: "100 · Gesso — Teto", pontos: ["Vista geral do teto", "Canto esquerdo", "Canto direito", "Acabamento da sanca"] },
       sanca: { nome: "200 · Gesso — Sanca", pontos: ["Sanca da sala", "Sanca do quarto", "Emenda e acabamento"] },
@@ -25,7 +25,7 @@ export const EMPRESAS: Record<string, Empresa> = {
   pintura: {
     nome: "Pintura Total",
     corClasse: "pintura",
-    imagem: IMG.pinturaOk,
+    imagem: IMG.logoPintura,
     servicos: {
       geral: { nome: "100 · Pintura — Geral", pontos: ["Parede principal", "Teto", "Rodapé"] },
       cozinha: { nome: "200 · Pintura — Cozinha", pontos: ["Vista da porta", "Vista da janela", "Lavanderia"] },
@@ -102,12 +102,13 @@ export const LANCAMENTOS_INICIAIS: Lancamento[] = [
       { nome: "Vista da janela", foto: IMG.pinturaMalFeita },
       { nome: "Lavanderia", foto: null },
     ],
-    observacao: "Faltou registrar a lavanderia, retornar amanhã.",
-    status: "pendencia", notaFiscal: "Pintura da janela com falhas visíveis e respingos de tinta no piso da lavanderia. Corrigir antes de fechar o item.",
+    observacao: "Faltou tinta pra terminar a lavanderia — já avisei o almoxarifado, aguardando reposição pra concluir.",
+    status: "pendencia", notaFiscal: "Impedimento por falta de material (tinta). Serviço parado até a reposição chegar — retomar a conferência quando a lavanderia for finalizada.",
     eventos: [
       { autor: "Paulo Ricardo", acao: "criou o lançamento", data: "25/06/2026 11:00" },
       { autor: "Paulo Ricardo", acao: "subiu novas fotos", data: "25/06/2026 11:40" },
-      { autor: "Heitor", acao: "conferiu e registrou pendência", data: "26/06/2026 09:15" },
+      { autor: "Paulo Ricardo", acao: "relatou falta de material (tinta)", data: "25/06/2026 11:45" },
+      { autor: "Heitor", acao: "conferiu e registrou impedimento", data: "26/06/2026 09:15" },
     ],
   },
   {
