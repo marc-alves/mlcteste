@@ -18,7 +18,7 @@ Cada lançamento guarda um histórico de eventos (quem criou, quem subiu novas f
 - **React 18** + **TypeScript** (strict mode)
 - **Vite 5** como bundler/dev server (`@vitejs/plugin-react`)
 - Sem roteador de URL: a navegação é controlada por uma máquina de estados simples (`Screen`) dentro de `App.tsx`
-- Sem backend/API: todo o estado (lançamentos, formulário em andamento, tema) vive em `useState` no componente raiz
+- Sem backend/API: todo o estado (lançamentos, limpezas, formulário em andamento, tema) vive em `useState` no componente raiz
 - CSS puro (`src/index.css`), com suporte a modo claro/escuro via classe `dark` no `<body>`
 - Fontes carregadas via Google Fonts no `index.html` (IBM Plex Sans/Mono, Inter)
 - Layout em formato de "moldura de celular" (`#phone` / `#content`), simulando um app mobile dentro do navegador desktop
@@ -54,7 +54,7 @@ src/
     Home.tsx                Tela inicial de seleção de perfil (Terceiro vs Fiscal)
     Terceiro.tsx             Todas as telas do fluxo do terceiro, ver abaixo
     Fiscal.tsx               Telas do fluxo do fiscal (área do arquiteto, lista e detalhe de lançamentos), ver abaixo
-    Limpeza.tsx              Painel somente-leitura do módulo de gestão de limpeza, acessado a partir da área do arquiteto
+    Limpeza.tsx              Painel do módulo de gestão de limpeza, acessado a partir da área do arquiteto
 ```
 
 ## Modelo de dados (`src/data.ts`)
@@ -72,15 +72,15 @@ Duas empresas estão modeladas hoje: **Melhor Gesso** (teto, sanca, rebaixamento
 
 ### Módulo de limpeza (`src/data.ts` + `src/screens/Limpeza.tsx`)
 
-Módulo à parte, com visão **somente-leitura** para o arquiteto/engenheiro (não existe perfil de "Gestão" no app — quem cria limpeza, marca presença ou redistribui está fora do escopo atual):
+Módulo à parte para o arquiteto/engenheiro acompanhar e atualizar a limpeza dos apartamentos (não existe perfil de "Gestão" no app — quem escala funcionárias, marca presença ou redistribui está fora do escopo atual):
 
 - **`Limpeza`**: um registro de limpeza — bloco/apto, tipo (`grossa` | `fina`), funcionária responsável, data, dia da semana e período (`manha` | `tarde`) calculados/atribuídos automaticamente, `status` (`StatusLimpeza`) e, opcionalmente, quando a colaboradora confirmou a retirada do material (`retiradoEm`) e se está `pendenteRedistribuicao` (funcionária escalada ausente, sem responsável confirmado).
 - **`StatusLimpeza`**: `a_solicitar` (falta o arquiteto solicitar ao almoxarifado — estado neutro, não é alerta, ainda dá tempo no dia) → `solicitado` (aguardando a colaboradora retirar por conta própria — sem confirmação, não dá pra saber se ela já foi) → `em_andamento` (ela já retirou e está executando a limpeza) → `retirado` (limpeza retirada/concluída). A retirada é um autorrelato dela: não existe um "retiradoPor" separado.
 - **`TIPOS_LIMPEZA`** / **`TEMPLATES_MATERIAIS`**: nome de exibição e lista fixa de materiais por tipo de limpeza (grossa: vassoura, sacos de entulho, espátula, pano e balde, desincrustante; fina: detergente neutro, água sanitária, álcool 70%, limpa-vidros, multiuso, pano de microfibra, esponja, luvas).
 - **`FUNCIONARIAS_LIMPEZA`**: lista de nomes usada nos filtros e no vínculo de cada limpeza.
-- **`LIMPEZAS_INICIAIS`**: registros de exemplo cobrindo os quatro status, incluindo um marcado como pendente de redistribuição.
+- **`LIMPEZAS_INICIAIS`**: registros de exemplo cobrindo os quatro status (incluindo um marcado como pendente de redistribuição), usados como estado inicial em `App.tsx`.
 
-Na tela `fiscal-limpeza` (acessada pelo card "Gerenciar limpeza" na área do arquiteto), o arquiteto filtra por tipo/funcionária/apartamento e abre `fiscal-limpeza-detalhe` para ver o checklist de retirada (timeline) e os materiais do template daquele tipo de limpeza. Um tour rápido opcional (3 passos, modal) explica o fluxo na primeira visita.
+Na tela `fiscal-limpeza` (acessada pelo card "Gerenciar limpeza" na área do arquiteto), o arquiteto filtra por tipo/funcionária/apartamento e abre `fiscal-limpeza-detalhe` para ver o checklist de retirada (timeline), os materiais do template daquele tipo de limpeza, e um seletor de status ("Atualizar status") pra corrigir o andamento manualmente — útil justamente porque a retirada é autorrelatada e pode não ter sido confirmada a tempo. Mudar o status ajusta `retiradoEm` automaticamente (`updateStatusLimpeza` em `App.tsx`). Um tour rápido opcional (3 passos, modal) explica o fluxo na primeira visita.
 
 ## Fluxos de tela
 
@@ -106,7 +106,7 @@ Ao enviar (`enviarLancamento` em `App.tsx`), o app verifica se já existe um lan
 2. `fiscal-empresas` ("Área do arquiteto") — dividida em duas seções visualmente separadas: **Dados** (resumo mensal com seletor de mês de `RESUMO_MENSAL`, KPIs, alerta de pendências antigas e progresso por etapa) e **Serviços** (lista de empresas com contagem de lançamentos/pendentes, mais uma lista de empresas já validadas de `EMPRESAS_VALIDADAS`, bloqueadas para conferência, com modal de "solicitar alteração" ao engenheiro responsável)
 3. `fiscal-lista` — lista de lançamentos da empresa escolhida, com filtro por status (todos/verificar/conferido/com impedimento)
 4. `fiscal-detalhe` — detalhe completo do lançamento: fotos por ponto, observação do terceiro, alerta contextual (ex.: dica sobre pendências de pintura), timeline de eventos, histórico de lançamentos anteriores do mesmo serviço/local, e ações de conferência (marcar conferido / registrar pendência / reabrir conferência)
-5. `fiscal-limpeza` / `fiscal-limpeza-detalhe` (`src/screens/Limpeza.tsx`) — painel somente-leitura do módulo de limpeza, acessado pelo card "Gerenciar limpeza" na área do arquiteto; ver seção do módulo de limpeza acima
+5. `fiscal-limpeza` / `fiscal-limpeza-detalhe` (`src/screens/Limpeza.tsx`) — painel do módulo de limpeza, acessado pelo card "Gerenciar limpeza" na área do arquiteto; ver seção do módulo de limpeza acima
 
 Ações do fiscal (`updateLancamento` em `App.tsx`) atualizam o `status`, a `notaFiscal` e anexam um novo `Evento` ao histórico do lançamento.
 
