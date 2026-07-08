@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { EMPRESAS, EMPRESAS_VALIDADAS, PROGRESSO_ETAPAS, RESUMO_MES, STATUS_LABEL, type EmpresaValidada, type Lancamento, type Status } from "../data";
-import { AlertIcon, CheckIcon, EmptyIcon, LockIcon } from "../icons";
+import { EMPRESAS, EMPRESAS_VALIDADAS, RESUMO_MENSAL, STATUS_LABEL, type EmpresaValidada, type Lancamento, type Status } from "../data";
+import { AlertIcon, CheckIcon, ChevronDownIcon, EmptyIcon, LockIcon } from "../icons";
 import { BLOCO_IMAGENS, IMG } from "../images";
 
 type FiscalNomeProps = {
@@ -41,7 +41,10 @@ type FiscalEmpresasProps = {
 export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: FiscalEmpresasProps) {
   const [empresaValidada, setEmpresaValidada] = useState<EmpresaValidada | null>(null);
   const [solicitado, setSolicitado] = useState(false);
-  const pctConferidos = Math.round((RESUMO_MES.conferidos / RESUMO_MES.totalLancamentos) * 100);
+  const meses = Object.keys(RESUMO_MENSAL);
+  const [mesSelecionado, setMesSelecionado] = useState(meses[0]);
+  const { resumo, progresso } = RESUMO_MENSAL[mesSelecionado];
+  const pctConferidos = Math.round((resumo.conferidos / resumo.totalLancamentos) * 100);
 
   const fecharModal = () => {
     setEmpresaValidada(null);
@@ -51,39 +54,56 @@ export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: Fisc
   return (
     <>
       <div className="eyebrow">Olá, {fiscalNome.split(" ")[0]}</div>
-      <h1 className="screen-title">Qual empresa você quer conferir?</h1>
-      <p className="screen-sub">Selecione a empresa para ver os lançamentos feitos por cada responsável.</p>
+      <h1 className="screen-title">Área do arquiteto</h1>
+      <p className="screen-sub">Acompanhe o resumo do mês e conduza a conferência dos serviços prestados.</p>
 
-      <div className="section-label">Visão geral</div>
+      <div className="area-block">
+      <h2 className="area-title">Dados</h2>
+      <div className="section-label-row">
+        <div className="section-label">Resumo mensal</div>
+        <label className="mes-select-wrap">
+          <select
+            className="mes-select"
+            value={mesSelecionado}
+            onChange={(e) => setMesSelecionado(e.target.value)}
+          >
+            {meses.map((m) => (
+              <option key={m} value={m}>{RESUMO_MENSAL[m].label}</option>
+            ))}
+          </select>
+          <ChevronDownIcon />
+        </label>
+      </div>
+
       <div className="kpi-row">
         <div className="kpi-card">
-          <span className="kpi-value">{RESUMO_MES.totalLancamentos}</span>
+          <span className="kpi-value">{resumo.totalLancamentos}</span>
           <span className="kpi-label">lançamentos no mês</span>
         </div>
         <div className="kpi-card">
-          <span className="kpi-value">{RESUMO_MES.conferidos}</span>
+          <span className="kpi-value">{resumo.conferidos}</span>
           <span className="kpi-label">conferidos</span>
           <span className="kpi-sub">{pctConferidos}%</span>
         </div>
         <div className="kpi-card">
-          <span className="kpi-value">{RESUMO_MES.aguardando}</span>
+          <span className="kpi-value">{resumo.aguardando}</span>
           <span className="kpi-label">aguardando conferência</span>
         </div>
         <div className="kpi-card">
-          <span className="kpi-value">{RESUMO_MES.comPendencia}</span>
+          <span className="kpi-value">{resumo.comPendencia}</span>
           <span className="kpi-label">com pendência</span>
         </div>
       </div>
 
-      {RESUMO_MES.pendenciasAntigas > 0 && (
+      {resumo.pendenciasAntigas > 0 && (
         <div className="alert-banner">
           <AlertIcon />
-          <span>{RESUMO_MES.pendenciasAntigas} pendências há mais de 5 dias sem resposta</span>
+          <span>{resumo.pendenciasAntigas} pendências há mais de 5 dias sem resposta</span>
         </div>
       )}
 
       <div className="section-label">Progresso por etapa</div>
-      {[...PROGRESSO_ETAPAS]
+      {[...progresso]
         .sort((a, b) => a.feitas / a.total - b.feitas / b.total)
         .map((etapa) => (
           <div key={etapa.label} className="progress-item">
@@ -96,8 +116,12 @@ export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: Fisc
             </div>
           </div>
         ))}
+      </div>
 
-      <div className="section-label">Serviços</div>
+      <div className="area-divider" />
+
+      <div className="area-block">
+      <h2 className="area-title">Serviços</h2>
 
       <div className="subsection-title"><span className="subsection-bar" />Serviços para conferir e validar</div>
       {Object.keys(EMPRESAS).map((key) => {
@@ -138,6 +162,7 @@ export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: Fisc
           <span className="badge-locked"><LockIcon /> Validado</span>
         </div>
       ))}
+      </div>
 
       {empresaValidada && (
         <div className="modal-overlay" onClick={fecharModal}>

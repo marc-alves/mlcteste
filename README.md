@@ -64,7 +64,7 @@ src/
 - **`Evento`**: entrada de auditoria (`autor`, `acao`, `data`) criada via `criarEvento()` sempre que algo relevante acontece com um lançamento.
 - **`LANCAMENTOS_INICIAIS`**: 5 lançamentos de exemplo (gesso e pintura, diferentes status) usados como estado inicial do app.
 - **`FEED_MOCK`**: lançamentos fictícios de "colegas de equipe" mostrados ao terceiro na tela `terceiro-feed`, antes de ele registrar o próprio serviço — não afeta o estado real, é só contexto visual.
-- **`RESUMO_MES`** / **`PROGRESSO_ETAPAS`**: KPIs (total de lançamentos, conferidos, aguardando, com pendência, pendências antigas) e progresso por etapa construtiva (tetos, sancas, rebaixamentos, pinturas) — mockados, exibidos como painel consolidado no topo da tela `fiscal-empresas`.
+- **`RESUMO_MENSAL`**: painel consolidado do mês exibido no topo da tela `fiscal-empresas`, com um seletor de mês — cada chave (ex.: `"2026-07"`) tem seus próprios KPIs (`ResumoMes`: total de lançamentos, conferidos, aguardando, com pendência, pendências antigas) e progresso por etapa construtiva (`ProgressoEtapa[]`: tetos, sancas, rebaixamentos, pinturas), todos mockados.
 - **`EMPRESAS_VALIDADAS`**: empresas cujo registro do mês já foi validado manualmente fora do app (ex.: esquadrias, metais, marcenaria) — aparecem bloqueadas (ícone de cadeado) na tela `fiscal-empresas`, com um modal para solicitar alteração ao engenheiro responsável em vez do fluxo normal de conferência.
 
 Duas empresas estão modeladas hoje: **Melhor Gesso** (teto, sanca, rebaixamento) e **Pintura Total** (geral, cozinha, sala, quarto).
@@ -89,7 +89,7 @@ Ao enviar (`enviarLancamento` em `App.tsx`), o app verifica se já existe um lan
 ### Fluxo do Fiscal (`src/screens/Fiscal.tsx`)
 
 1. `fiscal-nome` — informa o nome (associado às conferências que fizer)
-2. `fiscal-empresas` — painel do mês (KPIs de `RESUMO_MES`, alerta de pendências antigas, progresso por etapa de `PROGRESSO_ETAPAS`), lista de empresas com contagem de lançamentos/pendentes, e uma lista de empresas já validadas (`EMPRESAS_VALIDADAS`) bloqueadas para conferência, com modal de "solicitar alteração" ao engenheiro responsável
+2. `fiscal-empresas` ("Área do arquiteto") — dividida em duas seções visualmente separadas: **Dados** (resumo mensal com seletor de mês de `RESUMO_MENSAL`, KPIs, alerta de pendências antigas e progresso por etapa) e **Serviços** (lista de empresas com contagem de lançamentos/pendentes, mais uma lista de empresas já validadas de `EMPRESAS_VALIDADAS`, bloqueadas para conferência, com modal de "solicitar alteração" ao engenheiro responsável)
 3. `fiscal-lista` — lista de lançamentos da empresa escolhida, com filtro por status (todos/pendente/conferido/pendência)
 4. `fiscal-detalhe` — detalhe completo do lançamento: fotos por ponto, observação do terceiro, alerta contextual (ex.: dica sobre pendências de pintura), timeline de eventos, histórico de lançamentos anteriores do mesmo serviço/local, e ações de conferência (marcar conferido / registrar pendência / reabrir conferência)
 

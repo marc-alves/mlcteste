@@ -164,24 +164,48 @@ export type ResumoMes = {
   pendenciasAntigas: number; // pendências há mais de 5 dias sem resposta
 };
 
-export const RESUMO_MES: ResumoMes = {
-  totalLancamentos: 47,
-  conferidos: 33,
-  aguardando: 9,
-  comPendencia: 5,
-  pendenciasAntigas: 3,
-};
-
 // Progresso por etapa construtiva, mockado — dá ao resumo mensal uma
 // visão granular ("quanto já foi feito de cada parte"), além dos KPIs gerais.
 export type ProgressoEtapa = { label: string; feitas: number; total: number };
 
-export const PROGRESSO_ETAPAS: ProgressoEtapa[] = [
-  { label: "Tetos", feitas: 18, total: 20 },
-  { label: "Sancas", feitas: 9, total: 12 },
-  { label: "Rebaixamentos", feitas: 6, total: 8 },
-  { label: "Pinturas", feitas: 14, total: 20 },
-];
+// Resumo mensal exibido em "fiscal-empresas", com um seletor de mês —
+// cada chave é um mês com seus próprios KPIs e progresso por etapa mockados.
+export type ResumoMensal = { label: string; resumo: ResumoMes; progresso: ProgressoEtapa[] };
+
+export const RESUMO_MENSAL: Record<string, ResumoMensal> = {
+  "2026-07": {
+    label: "Julho 2026",
+    resumo: {
+      totalLancamentos: 47,
+      conferidos: 33,
+      aguardando: 9,
+      comPendencia: 5,
+      pendenciasAntigas: 3,
+    },
+    progresso: [
+      { label: "Tetos", feitas: 18, total: 20 },
+      { label: "Sancas", feitas: 9, total: 12 },
+      { label: "Rebaixamentos", feitas: 6, total: 8 },
+      { label: "Pinturas", feitas: 14, total: 20 },
+    ],
+  },
+  "2026-06": {
+    label: "Junho 2026",
+    resumo: {
+      totalLancamentos: 39,
+      conferidos: 31,
+      aguardando: 2,
+      comPendencia: 6,
+      pendenciasAntigas: 0,
+    },
+    progresso: [
+      { label: "Tetos", feitas: 20, total: 20 },
+      { label: "Sancas", feitas: 12, total: 12 },
+      { label: "Rebaixamentos", feitas: 3, total: 8 },
+      { label: "Pinturas", feitas: 9, total: 20 },
+    ],
+  },
+};
 
 // Empresas cujo registro do mês já foi validado manualmente (fora do app) e
 // está travado — só o engenheiro responsável pode alterá-lo. Aparecem na

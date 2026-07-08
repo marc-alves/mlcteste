@@ -19,6 +19,12 @@ export const BackIcon = () => (
   </svg>
 );
 
+export const ChevronDownIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+);
+
 export const SunIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
     <circle cx="12" cy="12" r="4.2" />
