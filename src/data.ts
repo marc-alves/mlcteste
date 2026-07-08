@@ -306,6 +306,10 @@ export const STATUS_LIMPEZA_LABEL: Record<StatusLimpeza, string> = {
   em_andamento: "Em andamento",
 };
 
+// Ordem natural do fluxo, usada para listar as opções de status editáveis
+// pelo arquiteto na tela de detalhe da limpeza.
+export const STATUS_LIMPEZA_ORDEM: StatusLimpeza[] = ["a_solicitar", "solicitado", "em_andamento", "retirado"];
+
 export type PeriodoDia = "manha" | "tarde";
 
 export const PERIODO_DIA_LABEL: Record<PeriodoDia, string> = {

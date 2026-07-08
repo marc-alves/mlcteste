@@ -1,12 +1,13 @@
 import { useState } from "react";
 import {
   FUNCIONARIAS_LIMPEZA,
-  LIMPEZAS_INICIAIS,
   PERIODO_DIA_LABEL,
   STATUS_LIMPEZA_LABEL,
+  STATUS_LIMPEZA_ORDEM,
   TEMPLATES_MATERIAIS,
   TIPOS_LIMPEZA,
   type Limpeza,
+  type StatusLimpeza,
   type TipoLimpezaKey,
 } from "../data";
 import { AlertIcon, EmptyIcon } from "../icons";
@@ -66,18 +67,19 @@ function DiaPeriodoChip({ l }: { l: Limpeza }) {
 }
 
 type LimpezaPainelProps = {
+  limpezas: Limpeza[];
   onAbrirDetalhe: (id: string) => void;
 };
 
-export function LimpezaPainel({ onAbrirDetalhe }: LimpezaPainelProps) {
+export function LimpezaPainel({ limpezas, onAbrirDetalhe }: LimpezaPainelProps) {
   const [filtroTipo, setFiltroTipo] = useState<"todos" | TipoLimpezaKey>("todos");
   const [filtroFuncionaria, setFiltroFuncionaria] = useState("todas");
   const [filtroApto, setFiltroApto] = useState("todos");
   const [mostrarTour, setMostrarTour] = useState(true);
 
-  const aptos = Array.from(new Set(LIMPEZAS_INICIAIS.map((l) => `${l.bloco}/${l.apto}`))).sort();
+  const aptos = Array.from(new Set(limpezas.map((l) => `${l.bloco}/${l.apto}`))).sort();
 
-  const lista = LIMPEZAS_INICIAIS
+  const lista = limpezas
     .filter((l) => filtroTipo === "todos" || l.tipo === filtroTipo)
     .filter((l) => filtroFuncionaria === "todas" || l.funcionaria === filtroFuncionaria)
     .filter((l) => filtroApto === "todos" || `${l.bloco}/${l.apto}` === filtroApto)
@@ -163,9 +165,10 @@ export function LimpezaPainel({ onAbrirDetalhe }: LimpezaPainelProps) {
 
 type LimpezaDetalheProps = {
   limpeza: Limpeza;
+  onMudarStatus: (novoStatus: StatusLimpeza) => void;
 };
 
-export function LimpezaDetalhe({ limpeza: l }: LimpezaDetalheProps) {
+export function LimpezaDetalhe({ limpeza: l, onMudarStatus }: LimpezaDetalheProps) {
   const materiais = TEMPLATES_MATERIAIS[l.tipo];
   const aSolicitar = l.status === "a_solicitar";
   const retirado = !!l.retiradoEm;
@@ -244,6 +247,22 @@ export function LimpezaDetalhe({ limpeza: l }: LimpezaDetalheProps) {
           {m}
         </div>
       ))}
+
+      <div className="section-label">Atualizar status</div>
+      <p className="screen-sub" style={{ marginTop: -14 }}>
+        Você decide o status — use quando tiver certeza do andamento, mesmo sem confirmação da colaboradora.
+      </p>
+      <div className="filtros" style={{ flexWrap: "wrap" }}>
+        {STATUS_LIMPEZA_ORDEM.map((s) => (
+          <div
+            key={s}
+            className={`filtro-chip ${l.status === s ? "active" : ""}`}
+            onClick={() => onMudarStatus(s)}
+          >
+            {STATUS_LIMPEZA_LABEL[s]}
+          </div>
+        ))}
+      </div>
     </>
   );
 }

@@ -14,7 +14,7 @@ import {
 } from "./screens/Terceiro";
 import { FiscalNome, FiscalEmpresas, FiscalLista, FiscalDetalhe } from "./screens/Fiscal";
 import { LimpezaPainel, LimpezaDetalhe } from "./screens/Limpeza";
-import { LANCAMENTOS_INICIAIS, LIMPEZAS_INICIAIS, criarEvento, type Evento, type Lancamento, type Status } from "./data";
+import { LANCAMENTOS_INICIAIS, LIMPEZAS_INICIAIS, criarEvento, type Evento, type Lancamento, type Limpeza, type Status, type StatusLimpeza } from "./data";
 import { BACK_FLOW, NOVO_LANCAMENTO_VAZIO, type Screen, type NovoLancamentoState } from "./types";
 
 let seq = 6;
@@ -26,6 +26,7 @@ export default function App() {
     document.body.classList.toggle("dark", darkMode);
   }, [darkMode]);
   const [lancamentos, setLancamentos] = useState<Lancamento[]>(LANCAMENTOS_INICIAIS);
+  const [limpezas, setLimpezas] = useState<Limpeza[]>(LIMPEZAS_INICIAIS);
 
   const [novo, setNovoState] = useState<NovoLancamentoState>(NOVO_LANCAMENTO_VAZIO);
   const setNovo = (update: Partial<NovoLancamentoState>) => setNovoState((s) => ({ ...s, ...update }));
@@ -83,11 +84,25 @@ export default function App() {
 
   const currentLancamento = currentId ? lancamentos.find((l) => l.id === currentId) ?? null : null;
   const terceiroLancamento = terceiroRegistroId ? lancamentos.find((l) => l.id === terceiroRegistroId) ?? null : null;
-  const limpezaAtual = limpezaId ? LIMPEZAS_INICIAIS.find((l) => l.id === limpezaId) ?? null : null;
+  const limpezaAtual = limpezaId ? limpezas.find((l) => l.id === limpezaId) ?? null : null;
 
   const updateLancamento = (id: string, update: Partial<Lancamento>, evento?: Evento) => {
     setLancamentos((ls) =>
       ls.map((l) => (l.id === id ? { ...l, ...update, eventos: evento ? [...l.eventos, evento] : l.eventos } : l))
+    );
+  };
+
+  const updateStatusLimpeza = (id: string, novoStatus: StatusLimpeza) => {
+    setLimpezas((ls) =>
+      ls.map((l) => {
+        if (l.id !== id) return l;
+        const retirouAgora = novoStatus === "retirado" || novoStatus === "em_andamento";
+        return {
+          ...l,
+          status: novoStatus,
+          retiradoEm: retirouAgora ? l.retiradoEm ?? new Date().toLocaleString("pt-BR") : undefined,
+        };
+      })
     );
   };
 
@@ -157,6 +172,7 @@ export default function App() {
           <FiscalEmpresas
             fiscalNome={fiscalNome}
             lancamentos={lancamentos}
+            limpezas={limpezas}
             onAbrirEmpresa={(key) => {
               setFiltroEmpresa(key);
               setFiltroStatus("todos");
@@ -167,6 +183,7 @@ export default function App() {
         )}
         {screen === "fiscal-limpeza" && (
           <LimpezaPainel
+            limpezas={limpezas}
             onAbrirDetalhe={(id) => {
               setLimpezaId(id);
               go("fiscal-limpeza-detalhe");
@@ -174,7 +191,10 @@ export default function App() {
           />
         )}
         {screen === "fiscal-limpeza-detalhe" && limpezaAtual && (
-          <LimpezaDetalhe limpeza={limpezaAtual} />
+          <LimpezaDetalhe
+            limpeza={limpezaAtual}
+            onMudarStatus={(novoStatus) => updateStatusLimpeza(limpezaAtual.id, novoStatus)}
+          />
         )}
         {screen === "fiscal-lista" && filtroEmpresa && (
           <FiscalLista

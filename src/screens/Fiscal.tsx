@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { EMPRESAS, EMPRESAS_VALIDADAS, LIMPEZAS_INICIAIS, RESUMO_MENSAL, STATUS_LABEL, type EmpresaValidada, type Lancamento, type Status } from "../data";
+import { EMPRESAS, EMPRESAS_VALIDADAS, RESUMO_MENSAL, STATUS_LABEL, type EmpresaValidada, type Lancamento, type Limpeza, type Status } from "../data";
 import { AlertIcon, CheckIcon, ChevronDownIcon, EmptyIcon, LockIcon } from "../icons";
 import { BLOCO_IMAGENS, IMG } from "../images";
 
@@ -35,11 +35,12 @@ export function FiscalNome({ fiscalNome, onConfirm }: FiscalNomeProps) {
 type FiscalEmpresasProps = {
   fiscalNome: string;
   lancamentos: Lancamento[];
+  limpezas: Limpeza[];
   onAbrirEmpresa: (key: string) => void;
   onAbrirLimpeza: () => void;
 };
 
-export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa, onAbrirLimpeza }: FiscalEmpresasProps) {
+export function FiscalEmpresas({ fiscalNome, lancamentos, limpezas, onAbrirEmpresa, onAbrirLimpeza }: FiscalEmpresasProps) {
   const [empresaValidada, setEmpresaValidada] = useState<EmpresaValidada | null>(null);
   const [solicitado, setSolicitado] = useState(false);
   const meses = Object.keys(RESUMO_MENSAL);
@@ -159,15 +160,15 @@ export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa, onAbri
           <span className="empresa-tag">Painel</span>
           <strong>Gerenciar limpeza</strong>
           <div className="empresa-meta">
-            <span className="empresa-meta-line">{LIMPEZAS_INICIAIS.length} registros no painel</span>
-            {LIMPEZAS_INICIAIS.some((l) => l.status === "a_solicitar") && (
+            <span className="empresa-meta-line">{limpezas.length} registros no painel</span>
+            {limpezas.some((l) => l.status === "a_solicitar") && (
               <span className="mini-badge mini-badge-neutro">
-                {LIMPEZAS_INICIAIS.filter((l) => l.status === "a_solicitar").length} falta solicitar
+                {limpezas.filter((l) => l.status === "a_solicitar").length} falta solicitar
               </span>
             )}
-            {LIMPEZAS_INICIAIS.some((l) => l.pendenteRedistribuicao) && (
+            {limpezas.some((l) => l.pendenteRedistribuicao) && (
               <span className="mini-badge mini-badge-erro">
-                {LIMPEZAS_INICIAIS.filter((l) => l.pendenteRedistribuicao).length} pendente de redistribuição
+                {limpezas.filter((l) => l.pendenteRedistribuicao).length} pendente de redistribuição
               </span>
             )}
           </div>
