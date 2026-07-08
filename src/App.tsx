@@ -4,6 +4,7 @@ import { Home } from "./screens/Home";
 import {
   TerceiroNome,
   TerceiroEmpresa,
+  TerceiroFeed,
   TerceiroLocal,
   TerceiroServico,
   TerceiroPontos,
@@ -94,7 +95,10 @@ export default function App() {
           <TerceiroNome novo={novo} setNovo={setNovo} onNext={() => go("terceiro-empresa")} />
         )}
         {screen === "terceiro-empresa" && (
-          <TerceiroEmpresa novo={novo} setNovo={setNovo} onNext={() => go("terceiro-local")} />
+          <TerceiroEmpresa novo={novo} setNovo={setNovo} onNext={() => go("terceiro-feed")} />
+        )}
+        {screen === "terceiro-feed" && (
+          <TerceiroFeed novo={novo} setNovo={setNovo} onNext={() => go("terceiro-local")} />
         )}
         {screen === "terceiro-local" && (
           <TerceiroLocal novo={novo} setNovo={setNovo} onNext={() => go("terceiro-servico")} />

@@ -122,12 +122,74 @@
     border-radius:var(--radius);margin-bottom:12px;cursor:pointer;background:var(--surface);
   }
   .empresa-card.selected{border-color:var(--primary); background:var(--primary-soft);}
+  .empresa-card.destaque{border-color:var(--primary-soft);box-shadow:var(--shadow);}
+  .empresa-card.destaque:active{background:var(--primary-soft);}
+  .empresa-count{color:var(--ink);}
+  .mini-badge{
+    display:inline-flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+    padding:2px 8px;border-radius:20px;margin-left:8px;white-space:nowrap;
+    background:var(--accent-soft);color:var(--ink);border:1px solid var(--accent);
+  }
   .empresa-dot{width:38px;height:38px;border-radius:9px;flex-shrink:0;}
   .empresa-dot.gesso{background:#8FA79A;}
   .empresa-dot.pintura{background:#C9A24C;}
+  .empresa-dot.janela{background:#7FA8C9;}
+  .empresa-dot.vasos{background:#B99CC9;}
+  .empresa-dot.pia{background:#C98F72;}
   .empresa-thumb{width:44px;height:44px;border-radius:10px;flex-shrink:0;object-fit:cover;}
   .empresa-card strong{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;}
   .empresa-card span{font-size:12.5px;color:var(--ink-soft);}
+  .empresa-card.locked{
+    opacity:0.82;align-items:center;position:relative;
+  }
+  .empresa-card.locked:active{background:var(--bg);}
+  .badge-locked{
+    margin-left:auto;flex-shrink:0;display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.08em;
+    text-transform:uppercase;color:var(--ink-faint);background:var(--bg);border:1px solid var(--line);
+    border-radius:20px;padding:4px 9px;
+  }
+
+  /* KPIs do resumo mensal (fiscal-empresas) */
+  .kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .kpi-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 14px;display:flex;flex-direction:column;gap:2px;
+  }
+  .kpi-value{font-family:'IBM Plex Sans',sans-serif;font-size:22px;font-weight:700;color:var(--ink);line-height:1.1;}
+  .kpi-label{font-size:11.5px;color:var(--ink-soft);}
+  .kpi-sub{font-size:11px;color:var(--ink-faint);}
+
+  /* Progresso por etapa (resumo mensal) */
+  .progress-item{margin-bottom:12px;}
+  .progress-item-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
+  .progress-item-label{font-size:13px;color:var(--ink);font-weight:600;}
+  .progress-item-frac{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);}
+  .progress-bar-track{height:6px;border-radius:4px;background:var(--line);overflow:hidden;}
+  .progress-bar-fill{height:100%;border-radius:4px;background:var(--primary);}
+
+  .alert-banner{
+    display:flex;align-items:center;gap:10px;background:var(--danger-soft);color:var(--danger);
+    border:1px solid var(--danger);border-radius:var(--radius);padding:11px 14px;font-size:12.5px;
+    line-height:1.4;margin-bottom:20px;
+  }
+  .alert-banner svg{flex-shrink:0;}
+
+  /* Modal simples (registro validado) */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(10,14,12,0.5);display:flex;align-items:center;
+    justify-content:center;padding:24px;z-index:50;
+  }
+  .modal-card{
+    background:var(--surface);border-radius:var(--radius);padding:24px;max-width:340px;width:100%;
+    text-align:center;box-shadow:var(--shadow);
+  }
+  .modal-icon{
+    width:44px;height:44px;border-radius:50%;background:var(--bg);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--ink-soft);
+  }
+  .modal-title{font-size:17px;font-weight:700;margin:0 0 8px 0;}
+  .modal-text{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 18px 0;}
+  .modal-card .btn-row{margin-bottom:0;}
 
   /* Imagens de bloco */
   .bloco-banner{width:100%;height:150px;object-fit:cover;border-radius:var(--radius);margin-bottom:18px;display:block;}
@@ -230,6 +292,8 @@
   .pt-status-off{color:var(--ink-faint);font-size:12.5px;}
   .obs-box{background:var(--bg);border-radius:10px;padding:14px;font-size:14px;color:var(--ink-soft);line-height:1.5;margin-bottom:22px;}
   .section-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);margin:26px 0 12px 0;}
+  .subsection-title{display:flex;align-items:center;gap:9px;font-family:'IBM Plex Sans',sans-serif;font-size:15.5px;font-weight:700;color:var(--ink);margin:20px 0 12px 0;}
+  .subsection-bar{width:4px;height:16px;border-radius:2px;background:var(--primary);flex-shrink:0;}
 
   .hist-item{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
   .hist-item:last-child{border-bottom:none;}
@@ -244,6 +308,17 @@
   .timeline-item:last-child .timeline-body{padding-bottom:2px;}
   .timeline-text{font-size:13.5px;color:var(--ink);line-height:1.4;}
   .timeline-date{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);white-space:nowrap;flex-shrink:0;padding-top:1px;}
+
+  /* Feed de atividade da equipe (terceiro) */
+  .feed-card{
+    display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);
+    border-radius:var(--radius);margin-bottom:10px;background:var(--surface);
+  }
+  .feed-thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;}
+  .feed-body{flex:1;min-width:0;}
+  .feed-title{font-size:13.5px;color:var(--ink);line-height:1.4;}
+  .feed-meta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .feed-tempo{font-size:11.5px;color:var(--ink-faint);margin-top:2px;}
 
   /* Success */
   .success-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:50px 10px;}

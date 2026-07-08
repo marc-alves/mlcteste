@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { EMPRESAS } from "../data";
+import { EMPRESAS, FEED_MOCK } from "../data";
 import { CameraIcon, CheckIcon } from "../icons";
 import { BLOCO_IMAGENS, IMG } from "../images";
 import type { NovoLancamentoState } from "../types";
@@ -57,6 +57,32 @@ export function TerceiroEmpresa({ novo, setNovo, onNext }: StepProps) {
       {cards}
       <div className="bottombar">
         <button className="btn btn-primary" disabled={!novo.empresaKey} onClick={onNext}>Continuar</button>
+      </div>
+    </>
+  );
+}
+
+export function TerceiroFeed({ novo, onNext }: StepProps) {
+  if (!novo.empresaKey) return null;
+  const emp = EMPRESAS[novo.empresaKey];
+  const feed = FEED_MOCK[novo.empresaKey] ?? [];
+  return (
+    <>
+      <div className="eyebrow">{emp.nome}</div>
+      <h1 className="screen-title">O que a equipe já lançou</h1>
+      <p className="screen-sub">Últimos registros de outros prestadores da {emp.nome}, só pra você ter uma ideia do andamento da obra.</p>
+      {feed.map((f, i) => (
+        <div key={i} className="feed-card">
+          <img className="feed-thumb" src={f.foto} alt={f.servico} />
+          <div className="feed-body">
+            <div className="feed-title"><strong>{f.autor}</strong> lançou — {f.servico}</div>
+            <div className="feed-meta">Bloco {f.bloco} · Apto {f.apto}</div>
+            <div className="feed-tempo">{f.tempo}</div>
+          </div>
+        </div>
+      ))}
+      <div className="bottombar">
+        <button className="btn btn-primary" onClick={onNext}>Continuar meu lançamento</button>
       </div>
     </>
   );
@@ -157,7 +183,7 @@ export function TerceiroPontos({ novo, setNovo, onNext }: StepProps) {
         <div key={p.nome} className="ponto-card">
           <div className="ponto-head">
             <strong>{p.nome}</strong>
-            {p.foto && <span className="pt-status-ok"><CheckIcon /> anexada</span>}
+            {p.foto && <span className="pt-status-ok"><CheckIcon /> foto salva</span>}
           </div>
           {p.foto && <img className="pt-thumb" src={p.foto} alt={p.nome} style={{ marginBottom: 10 }} />}
           <label className={`foto-btn ${p.foto ? "ok" : ""}`} htmlFor={`file${i}`}>

@@ -1,0 +1,111 @@
+# MLC Controle
+
+Protótipo de aplicativo mobile-first para **registro e fiscalização de serviços de terceiros em obra** (gesso, pintura, etc). Construído em React + TypeScript + Vite, com estado 100% em memória (sem backend) — pensado como prova de conceito navegável para validar o fluxo com o cliente antes de evoluir para uma versão com persistência real.
+
+> ⚠️ Versão de teste: todos os dados, nomes e fotos são fictícios (ver banner exibido na tela inicial do app).
+
+## Visão geral
+
+O app simula uma obra com dois perfis de uso, escolhidos na tela inicial:
+
+- **Terceiro** (pedreiro, gesseiro, pintor...): registra um serviço executado em um apartamento, anexando fotos de "pontos de verificação" pré-definidos para o tipo de serviço.
+- **Fiscal** (arquiteto/engenheiro): navega pelas empresas prestadoras, revisa os lançamentos feitos pelos terceiros, e marca cada um como **conferido** ou com **pendência**, deixando uma nota.
+
+Cada lançamento guarda um histórico de eventos (quem criou, quem subiu novas fotos, quem conferiu, etc.), exibido como uma timeline na tela de detalhe do fiscal.
+
+## Stack técnica
+
+- **React 18** + **TypeScript** (strict mode)
+- **Vite 5** como bundler/dev server (`@vitejs/plugin-react`)
+- Sem roteador de URL: a navegação é controlada por uma máquina de estados simples (`Screen`) dentro de `App.tsx`
+- Sem backend/API: todo o estado (lançamentos, formulário em andamento, tema) vive em `useState` no componente raiz
+- CSS puro (`src/index.css`), com suporte a modo claro/escuro via classe `dark` no `<body>`
+- Fontes carregadas via Google Fonts no `index.html` (IBM Plex Sans/Mono, Inter)
+- Layout em formato de "moldura de celular" (`#phone` / `#content`), simulando um app mobile dentro do navegador desktop
+
+## Como rodar
+
+```bash
+npm install
+npm run dev       # inicia o servidor de desenvolvimento (Vite)
+```
+
+Outros scripts disponíveis (`package.json`):
+
+```bash
+npm run build      # type-check (tsc -b) + build de produção via Vite
+npm run preview    # serve o build de produção localmente
+```
+
+## Estrutura do projeto
+
+```
+index.html                 Shell HTML, fontes, ponto de montagem #root
+src/
+  main.tsx                 Bootstrap do React (StrictMode + CSS global)
+  App.tsx                  Componente raiz: estado global e roteamento por telas
+  Topbar.tsx                Barra superior (voltar, título da tela, toggle de tema)
+  icons.tsx                 Ícones SVG inline usados pela UI
+  images.ts                 URLs de imagens de referência (mock) + mapa de imagens por bloco
+  types.ts                  Tipos de navegação (Screen), fluxo de "voltar", labels de tela
+  data.ts                   Modelo de dados de domínio + dados semente (empresas, serviços, lançamentos, feed mock)
+  index.css                 Todo o CSS da aplicação (tema claro/escuro, componentes)
+  screens/
+    Home.tsx                Tela inicial de seleção de perfil (Terceiro vs Fiscal)
+    Terceiro.tsx             Todas as telas do fluxo do terceiro (7 componentes, ver abaixo)
+    Fiscal.tsx               Todas as telas do fluxo do fiscal (4 componentes, ver abaixo)
+```
+
+## Modelo de dados (`src/data.ts`)
+
+- **`Empresa`**: empresa prestadora de serviço (ex.: "Melhor Gesso", "Pintura Total"), cada uma com uma cor/imagem e um dicionário de `Servico`.
+- **`Servico`**: tipo de serviço (ex.: "Gesso — Teto") com uma lista de nomes de "pontos de verificação" que precisam de foto.
+- **`Lancamento`**: um registro de serviço executado — empresa, serviço, bloco/apto, terceiro responsável, lista de `Ponto` (nome + foto opcional), observação, `status` (`pendente` | `conferido` | `pendencia`), nota da fiscalização e histórico de `Evento`.
+- **`Evento`**: entrada de auditoria (`autor`, `acao`, `data`) criada via `criarEvento()` sempre que algo relevante acontece com um lançamento.
+- **`LANCAMENTOS_INICIAIS`**: 5 lançamentos de exemplo (gesso e pintura, diferentes status) usados como estado inicial do app.
+- **`FEED_MOCK`**: lançamentos fictícios de "colegas de equipe" mostrados ao terceiro na tela `terceiro-feed`, antes de ele registrar o próprio serviço — não afeta o estado real, é só contexto visual.
+- **`RESUMO_MES`** / **`PROGRESSO_ETAPAS`**: KPIs (total de lançamentos, conferidos, aguardando, com pendência, pendências antigas) e progresso por etapa construtiva (tetos, sancas, rebaixamentos, pinturas) — mockados, exibidos como painel consolidado no topo da tela `fiscal-empresas`.
+- **`EMPRESAS_VALIDADAS`**: empresas cujo registro do mês já foi validado manualmente fora do app (ex.: esquadrias, metais, marcenaria) — aparecem bloqueadas (ícone de cadeado) na tela `fiscal-empresas`, com um modal para solicitar alteração ao engenheiro responsável em vez do fluxo normal de conferência.
+
+Duas empresas estão modeladas hoje: **Melhor Gesso** (teto, sanca, rebaixamento) e **Pintura Total** (geral, cozinha, sala, quarto).
+
+## Fluxos de tela
+
+O roteamento é controlado por um único estado `Screen` em `App.tsx`, com um mapa `BACK_FLOW` (`src/types.ts`) definindo para onde o botão "voltar" da `Topbar` deve levar em cada tela.
+
+### Fluxo do Terceiro (`src/screens/Terceiro.tsx`)
+
+1. `terceiro-nome` — informa o nome
+2. `terceiro-empresa` — escolhe a empresa prestadora
+3. `terceiro-feed` — vê um feed (mock) de lançamentos recentes da equipe daquela empresa
+4. `terceiro-local` — informa bloco e apartamento (exibe imagem de referência do bloco, se houver)
+5. `terceiro-servico` — escolhe o tipo de serviço prestado
+6. `terceiro-pontos` — anexa uma foto para cada ponto de verificação do serviço + observação opcional
+7. `terceiro-revisao` — tela de revisão final antes de enviar (alerta se algum ponto ficou sem foto)
+8. `terceiro-sucesso` — confirmação de envio, com opção de novo lançamento ou voltar ao início
+
+Ao enviar (`enviarLancamento` em `App.tsx`), o app verifica se já existe um lançamento igual (mesmo bloco/apto/serviço/empresa) para decidir se o evento registrado é "criou o lançamento" ou "subiu novas fotos", e adiciona o novo `Lancamento` no topo da lista.
+
+### Fluxo do Fiscal (`src/screens/Fiscal.tsx`)
+
+1. `fiscal-nome` — informa o nome (associado às conferências que fizer)
+2. `fiscal-empresas` — painel do mês (KPIs de `RESUMO_MES`, alerta de pendências antigas, progresso por etapa de `PROGRESSO_ETAPAS`), lista de empresas com contagem de lançamentos/pendentes, e uma lista de empresas já validadas (`EMPRESAS_VALIDADAS`) bloqueadas para conferência, com modal de "solicitar alteração" ao engenheiro responsável
+3. `fiscal-lista` — lista de lançamentos da empresa escolhida, com filtro por status (todos/pendente/conferido/pendência)
+4. `fiscal-detalhe` — detalhe completo do lançamento: fotos por ponto, observação do terceiro, alerta contextual (ex.: dica sobre pendências de pintura), timeline de eventos, histórico de lançamentos anteriores do mesmo serviço/local, e ações de conferência (marcar conferido / registrar pendência / reabrir conferência)
+
+Ações do fiscal (`updateLancamento` em `App.tsx`) atualizam o `status`, a `notaFiscal` e anexam um novo `Evento` ao histórico do lançamento.
+
+## Tema claro/escuro
+
+`App.tsx` mantém um estado `darkMode` e aplica a classe `dark` no `<body>`; todo o estilo correspondente está em `src/index.css` usando variáveis CSS. O botão de alternância fica na `Topbar`.
+
+## Imagens (`src/images.ts`)
+
+Todas as imagens usadas hoje são **URLs externas de referência/mock** (fotos de bancos de imagem/redes, não fotos reais de obra), usadas apenas para dar contexto visual ao protótipo. Em uma versão real, essas imagens viriam do upload feito pelo terceiro (hoje simulado via `URL.createObjectURL` no input de arquivo da tela `terceiro-pontos`).
+
+## Limitações conhecidas (protótipo)
+
+- Não há persistência: recarregar a página reseta todo o estado para `LANCAMENTOS_INICIAIS`.
+- Não há autenticação real: o "nome" informado em cada fluxo é apenas texto livre, sem validação de identidade.
+- Fotos anexadas pelo terceiro usam `URL.createObjectURL`, válidas apenas durante a sessão do navegador.
+- Sem testes automatizados configurados no projeto até o momento.

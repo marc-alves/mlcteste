@@ -17,9 +17,9 @@ export const EMPRESAS: Record<string, Empresa> = {
     corClasse: "gesso",
     imagem: IMG.gessoInstalando,
     servicos: {
-      teto: { nome: "Gesso — Teto", pontos: ["Vista geral do teto", "Canto esquerdo", "Canto direito", "Acabamento da sanca"] },
-      sanca: { nome: "Gesso — Sanca", pontos: ["Sanca da sala", "Sanca do quarto", "Emenda e acabamento"] },
-      rebaixamento: { nome: "Gesso — Rebaixamento", pontos: ["Estrutura metálica", "Fechamento das placas", "Nivelamento final"] },
+      teto: { nome: "100 · Gesso — Teto", pontos: ["Vista geral do teto", "Canto esquerdo", "Canto direito", "Acabamento da sanca"] },
+      sanca: { nome: "200 · Gesso — Sanca", pontos: ["Sanca da sala", "Sanca do quarto", "Emenda e acabamento"] },
+      rebaixamento: { nome: "300 · Gesso — Rebaixamento", pontos: ["Estrutura metálica", "Fechamento das placas", "Nivelamento final"] },
     },
   },
   pintura: {
@@ -27,10 +27,10 @@ export const EMPRESAS: Record<string, Empresa> = {
     corClasse: "pintura",
     imagem: IMG.pinturaOk,
     servicos: {
-      geral: { nome: "Pintura Geral", pontos: ["Parede principal", "Teto", "Rodapé"] },
-      cozinha: { nome: "Pintura Cozinha", pontos: ["Vista da porta", "Vista da janela", "Lavanderia"] },
-      sala: { nome: "Pintura Sala", pontos: ["Parede da TV", "Parede do sofá", "Teto"] },
-      quarto: { nome: "Pintura Quarto", pontos: ["Parede da cama", "Guarda-roupa", "Teto"] },
+      geral: { nome: "100 · Pintura — Geral", pontos: ["Parede principal", "Teto", "Rodapé"] },
+      cozinha: { nome: "200 · Pintura — Cozinha", pontos: ["Vista da porta", "Vista da janela", "Lavanderia"] },
+      sala: { nome: "300 · Pintura — Sala", pontos: ["Parede da TV", "Parede do sofá", "Teto"] },
+      quarto: { nome: "400 · Pintura — Quarto", pontos: ["Parede da cama", "Guarda-roupa", "Teto"] },
     },
   },
 };
@@ -147,4 +147,81 @@ export const STATUS_LABEL: Record<Status, string> = {
   pendente: "Pendente",
   conferido: "Conferido",
   pendencia: "Com pendência",
+};
+
+// Feed fake exibido ao terceiro ao selecionar a empresa — simula os
+// lançamentos recentes de outros colegas da mesma empresa. Não é real
+// (não vem de `lancamentos`), é só para dar sensação de atividade da equipe.
+export type FeedItem = { autor: string; bloco: string; apto: string; servico: string; foto: string; tempo: string };
+
+// KPIs mockados do resumo mensal exibido no topo de "fiscal-empresas" —
+// não vêm do array `lancamentos`, é só para dar sensação de painel consolidado.
+export type ResumoMes = {
+  totalLancamentos: number;
+  conferidos: number;
+  aguardando: number;
+  comPendencia: number;
+  pendenciasAntigas: number; // pendências há mais de 5 dias sem resposta
+};
+
+export const RESUMO_MES: ResumoMes = {
+  totalLancamentos: 47,
+  conferidos: 33,
+  aguardando: 9,
+  comPendencia: 5,
+  pendenciasAntigas: 3,
+};
+
+// Progresso por etapa construtiva, mockado — dá ao resumo mensal uma
+// visão granular ("quanto já foi feito de cada parte"), além dos KPIs gerais.
+export type ProgressoEtapa = { label: string; feitas: number; total: number };
+
+export const PROGRESSO_ETAPAS: ProgressoEtapa[] = [
+  { label: "Tetos", feitas: 18, total: 20 },
+  { label: "Sancas", feitas: 9, total: 12 },
+  { label: "Rebaixamentos", feitas: 6, total: 8 },
+  { label: "Pinturas", feitas: 14, total: 20 },
+];
+
+// Empresas cujo registro do mês já foi validado manualmente (fora do app) e
+// está travado — só o engenheiro responsável pode alterá-lo. Aparecem na
+// tela do fiscal como consulta, sem o fluxo de lançamento por pontos/fotos.
+export type EmpresaValidada = {
+  nome: string;
+  corClasse: string;
+  metrica: string;
+  engenheiroResponsavel: string;
+  imagem?: string;
+};
+
+export const EMPRESAS_VALIDADAS: EmpresaValidada[] = [
+  {
+    nome: "Esquadrias Rocha", corClasse: "janela",
+    metrica: "25 de 40 janelas entregues (62%)",
+    engenheiroResponsavel: "Heitor Souza", imagem: IMG.esquadriasRocha,
+  },
+  {
+    nome: "Metais Vaz", corClasse: "vasos",
+    metrica: "18 de 40 vasos instalados (45%)",
+    engenheiroResponsavel: "Heitor Souza", imagem: IMG.metaisVaz,
+  },
+  {
+    nome: "Marcenaria Lopes", corClasse: "pia",
+    metrica: "12 de 40 pias instaladas (30%)",
+    engenheiroResponsavel: "Heitor Souza", imagem: IMG.marcenariaLopes,
+  },
+];
+
+export const FEED_MOCK: Record<string, FeedItem[]> = {
+  gesso: [
+    { autor: "João Pedro", bloco: "B", apto: "202", servico: "100 · Gesso — Teto", foto: IMG.gessoTeto, tempo: "há 2 horas" },
+    { autor: "Carlos Andrade", bloco: "B", apto: "304", servico: "100 · Gesso — Teto", foto: IMG.gessoInstalando, tempo: "há 5 horas" },
+    { autor: "Jorge Almeida", bloco: "B", apto: "210", servico: "300 · Gesso — Rebaixamento", foto: IMG.gessoPlacas, tempo: "ontem" },
+    { autor: "Ana Souza", bloco: "C", apto: "108", servico: "200 · Gesso — Sanca", foto: IMG.gessoTextura, tempo: "há 2 dias" },
+  ],
+  pintura: [
+    { autor: "Paulo Ricardo", bloco: "A", apto: "112", servico: "200 · Pintura — Cozinha", foto: IMG.pinturaMalFeita, tempo: "há 1 hora" },
+    { autor: "Jorge Almeida", bloco: "C", apto: "208", servico: "300 · Pintura — Sala", foto: IMG.paredeBrancaSala, tempo: "há 4 horas" },
+    { autor: "Marina Lopes", bloco: "A", apto: "305", servico: "400 · Pintura — Quarto", foto: IMG.pinturaOk, tempo: "ontem" },
+  ],
 };

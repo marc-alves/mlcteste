@@ -4,6 +4,7 @@ export type Screen =
   | "home"
   | "terceiro-nome"
   | "terceiro-empresa"
+  | "terceiro-feed"
   | "terceiro-local"
   | "terceiro-servico"
   | "terceiro-pontos"
@@ -37,7 +38,8 @@ export const NOVO_LANCAMENTO_VAZIO: NovoLancamentoState = {
 export const BACK_FLOW: Partial<Record<Screen, Screen>> = {
   "terceiro-nome": "home",
   "terceiro-empresa": "terceiro-nome",
-  "terceiro-local": "terceiro-empresa",
+  "terceiro-feed": "terceiro-empresa",
+  "terceiro-local": "terceiro-feed",
   "terceiro-servico": "terceiro-local",
   "terceiro-pontos": "terceiro-servico",
   "terceiro-revisao": "terceiro-pontos",
@@ -51,6 +53,7 @@ export const SCREEN_LABELS: Record<Screen, string> = {
   home: "",
   "terceiro-nome": "Novo lançamento",
   "terceiro-empresa": "Novo lançamento",
+  "terceiro-feed": "Atividade da equipe",
   "terceiro-local": "Novo lançamento",
   "terceiro-servico": "Novo lançamento",
   "terceiro-pontos": "Novo lançamento",

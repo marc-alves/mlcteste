@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { EMPRESAS, STATUS_LABEL, type Lancamento, type Status } from "../data";
-import { CheckIcon, EmptyIcon } from "../icons";
+import { EMPRESAS, EMPRESAS_VALIDADAS, PROGRESSO_ETAPAS, RESUMO_MES, STATUS_LABEL, type EmpresaValidada, type Lancamento, type Status } from "../data";
+import { AlertIcon, CheckIcon, EmptyIcon, LockIcon } from "../icons";
 import { BLOCO_IMAGENS, IMG } from "../images";
 
 type FiscalNomeProps = {
@@ -39,27 +39,133 @@ type FiscalEmpresasProps = {
 };
 
 export function FiscalEmpresas({ fiscalNome, lancamentos, onAbrirEmpresa }: FiscalEmpresasProps) {
+  const [empresaValidada, setEmpresaValidada] = useState<EmpresaValidada | null>(null);
+  const [solicitado, setSolicitado] = useState(false);
+  const pctConferidos = Math.round((RESUMO_MES.conferidos / RESUMO_MES.totalLancamentos) * 100);
+
+  const fecharModal = () => {
+    setEmpresaValidada(null);
+    setSolicitado(false);
+  };
+
   return (
     <>
       <div className="eyebrow">Olá, {fiscalNome.split(" ")[0]}</div>
       <h1 className="screen-title">Qual empresa você quer conferir?</h1>
       <p className="screen-sub">Selecione a empresa para ver os lançamentos feitos por cada responsável.</p>
+
+      <div className="section-label">Visão geral</div>
+      <div className="kpi-row">
+        <div className="kpi-card">
+          <span className="kpi-value">{RESUMO_MES.totalLancamentos}</span>
+          <span className="kpi-label">lançamentos no mês</span>
+        </div>
+        <div className="kpi-card">
+          <span className="kpi-value">{RESUMO_MES.conferidos}</span>
+          <span className="kpi-label">conferidos</span>
+          <span className="kpi-sub">{pctConferidos}%</span>
+        </div>
+        <div className="kpi-card">
+          <span className="kpi-value">{RESUMO_MES.aguardando}</span>
+          <span className="kpi-label">aguardando conferência</span>
+        </div>
+        <div className="kpi-card">
+          <span className="kpi-value">{RESUMO_MES.comPendencia}</span>
+          <span className="kpi-label">com pendência</span>
+        </div>
+      </div>
+
+      {RESUMO_MES.pendenciasAntigas > 0 && (
+        <div className="alert-banner">
+          <AlertIcon />
+          <span>{RESUMO_MES.pendenciasAntigas} pendências há mais de 5 dias sem resposta</span>
+        </div>
+      )}
+
+      <div className="section-label">Progresso por etapa</div>
+      {[...PROGRESSO_ETAPAS]
+        .sort((a, b) => a.feitas / a.total - b.feitas / b.total)
+        .map((etapa) => (
+          <div key={etapa.label} className="progress-item">
+            <div className="progress-item-head">
+              <span className="progress-item-label">{etapa.label}</span>
+              <span className="progress-item-frac">{etapa.feitas}/{etapa.total}</span>
+            </div>
+            <div className="progress-bar-track">
+              <div className="progress-bar-fill" style={{ width: `${Math.round((etapa.feitas / etapa.total) * 100)}%` }} />
+            </div>
+          </div>
+        ))}
+
+      <div className="section-label">Serviços</div>
+
+      <div className="subsection-title"><span className="subsection-bar" />Serviços para conferir e validar</div>
       {Object.keys(EMPRESAS).map((key) => {
         const e = EMPRESAS[key];
         const regs = lancamentos.filter((l) => l.empresaKey === key);
         const pendentes = regs.filter((l) => l.status === "pendente").length;
         return (
-          <div key={key} className="empresa-card" onClick={() => onAbrirEmpresa(key)}>
+          <div key={key} className="empresa-card destaque" onClick={() => onAbrirEmpresa(key)}>
             <img className="empresa-thumb" src={e.imagem} alt={e.nome} />
             <div>
               <strong>{e.nome}</strong>
               <span>
-                {regs.length} lançamento{regs.length === 1 ? "" : "s"} · {pendentes} pendente{pendentes === 1 ? "" : "s"} de conferência
+                <strong className="empresa-count">{regs.length}</strong> lançamento{regs.length === 1 ? "" : "s"}
+                {pendentes > 0 && (
+                  <span className="mini-badge mini-badge-atencao">{pendentes} pendente{pendentes === 1 ? "" : "s"} de conferência</span>
+                )}
               </span>
             </div>
           </div>
         );
       })}
+
+      <div className="subsection-title"><span className="subsection-bar" />Registros já validados</div>
+      <p className="screen-sub" style={{ marginTop: -10 }}>
+        Já validados por outro arquiteto — para solicitar mudanças, use o botão abaixo.
+      </p>
+      {EMPRESAS_VALIDADAS.map((r) => (
+        <div key={r.nome} className="empresa-card locked" onClick={() => setEmpresaValidada(r)}>
+          {r.imagem ? (
+            <img className="empresa-thumb" src={r.imagem} alt={r.nome} />
+          ) : (
+            <div className={`empresa-dot ${r.corClasse}`} />
+          )}
+          <div>
+            <strong>{r.nome}</strong>
+            <span>{r.metrica}</span>
+          </div>
+          <span className="badge-locked"><LockIcon /> Validado</span>
+        </div>
+      ))}
+
+      {empresaValidada && (
+        <div className="modal-overlay" onClick={fecharModal}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            {!solicitado ? (
+              <>
+                <div className="modal-icon"><LockIcon /></div>
+                <h2 className="modal-title">{empresaValidada.nome}</h2>
+                <p className="modal-text">
+                  Este registro já foi validado por <strong>{empresaValidada.engenheiroResponsavel}</strong> e só ele pode alterá-lo.
+                </p>
+                <div className="btn-row">
+                  <button className="btn btn-ghost" onClick={fecharModal}>Fechar</button>
+                  <button className="btn btn-primary" onClick={() => setSolicitado(true)}>Solicitar alteração</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="success-stamp" style={{ margin: "0 auto 14px" }}><span>ENVIADO</span></div>
+                <p className="modal-text">
+                  Solicitação enviada para <strong>{empresaValidada.engenheiroResponsavel}</strong>.
+                </p>
+                <button className="btn btn-primary" onClick={fecharModal}>Fechar</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
