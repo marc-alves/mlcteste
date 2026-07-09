@@ -196,9 +196,6 @@
   .modal-title{font-size:17px;font-weight:700;margin:0 0 8px 0;}
   .modal-text{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 18px 0;}
   .modal-card .btn-row{margin-bottom:0;}
-  .tour-dots{display:flex;justify-content:center;gap:6px;margin-bottom:18px;}
-  .tour-dot{width:6px;height:6px;border-radius:50%;background:var(--line);}
-  .tour-dot.active{background:var(--primary);}
 
   /* Imagens de bloco */
   .bloco-banner{width:100%;height:150px;object-fit:cover;border-radius:var(--radius);margin-bottom:18px;display:block;}
@@ -259,6 +256,13 @@
     text-transform:uppercase;white-space:nowrap;flex-shrink:0;
   }
   .stamp::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+  .stamp-select-wrap{padding-right:8px;cursor:pointer;}
+  .stamp-select{
+    appearance:none;-webkit-appearance:none;border:none;background:transparent;background-image:none;color:inherit;
+    font:inherit;text-transform:inherit;letter-spacing:inherit;cursor:pointer;padding:0;margin:0;width:auto;
+  }
+  .stamp-select:focus{outline:none;}
+  .stamp-select option{color:var(--ink);background:var(--surface);text-transform:none;letter-spacing:normal;}
   .stamp.pendente{color:#6B7269;background:#E7E9E5;border:1px solid #D3D7D0;}
   .stamp.conferido{color:#1F4D3D;background:#DCEBE2;border:1px solid #BBDBC8;}
   .stamp.pendencia{color:#8A3524;background:#F5DFD6;border:1px solid #E9BCA9;}
@@ -296,6 +300,24 @@
     display:inline-block;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:700;
     color:var(--primary-dark);margin-bottom:4px;
   }
+
+  /* Painel de limpeza — card por pessoa */
+  .pessoa-card{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;background:var(--surface);overflow:hidden;}
+  .pessoa-card.ausente{background:var(--bg);}
+  .pessoa-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px;cursor:pointer;}
+  .pessoa-card-head-right{display:flex;align-items:center;gap:10px;}
+  .pessoa-nome{font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;color:var(--ink);}
+  .pessoa-chevron{display:flex;color:var(--ink-faint);transition:transform 0.15s ease;}
+  .pessoa-chevron.aberto{transform:rotate(180deg);}
+  .presenca-tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;}
+  .presenca-tag.presente{color:var(--primary-dark);}
+  .presenca-tag.ausente{color:var(--ink-faint);}
+  .pessoa-vazio{padding:0 16px 16px;font-size:13px;color:var(--ink-faint);}
+  .pessoa-linha{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+    padding:14px 16px;border-top:1px solid var(--line);cursor:pointer;
+  }
+  .pessoa-linha:active{background:var(--bg);}
 
   .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);}
   .empty-state svg{margin-bottom:14px;color:var(--ink-faint);}
@@ -402,6 +424,7 @@
   body.dark .reg-card-pendencia{background:#20140F;border-color:#5C3729;}
   body.dark .detail-header .reg-meta{color:#8FD6B2;}
   body.dark .dia-chip{color:#8FD6B2;}
+  body.dark .presenca-tag.presente{color:#8FD6B2;}
   body.dark .success-stamp span{color:#8FD6B2;}
 
   .theme-btn{

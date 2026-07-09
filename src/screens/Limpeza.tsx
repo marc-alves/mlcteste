@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   FUNCIONARIAS_LIMPEZA,
   PERIODO_DIA_LABEL,
+  PRESENCA_SEMANA,
   STATUS_LIMPEZA_LABEL,
   STATUS_LIMPEZA_ORDEM,
   TEMPLATES_MATERIAIS,
@@ -10,7 +11,7 @@ import {
   type StatusLimpeza,
   type TipoLimpezaKey,
 } from "../data";
-import { AlertIcon, EmptyIcon } from "../icons";
+import { AlertIcon, ChevronDownIcon } from "../icons";
 
 const FILTROS_TIPO: { k: "todos" | TipoLimpezaKey; label: string }[] = [
   { k: "todos", label: "Todos" },
@@ -18,72 +19,107 @@ const FILTROS_TIPO: { k: "todos" | TipoLimpezaKey; label: string }[] = [
   { k: "fina", label: "Fina" },
 ];
 
-const TOUR_PASSOS = [
-  {
-    titulo: "Como funciona a retirada",
-    texto: "Você só solicita a limpeza ao almoxarifado. Quem retira o material é a própria colaboradora, por conta própria — o sistema não confirma sozinho que ela foi lá, então um item \"Aguardando retirada\" pode já ter sido buscado sem ter sido marcado ainda.",
-  },
-  {
-    titulo: "Use os filtros",
-    texto: "Filtre por tipo de limpeza, funcionária ou apartamento pra achar rápido o que procura.",
-  },
-  {
-    titulo: "Acompanhe o status",
-    texto: "Toque em qualquer card pra ver os materiais do template e o checklist de retirada daquele apartamento.",
-  },
-];
+const FILTROS_DIA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
-function TourModal({ onFechar }: { onFechar: () => void }) {
-  const [passo, setPasso] = useState(0);
-  const ultimo = passo === TOUR_PASSOS.length - 1;
-  const atual = TOUR_PASSOS[passo];
+function DiaPeriodoChip({ l }: { l: Limpeza }) {
+  return <span className="dia-chip">{l.diaSemana}, {l.data.slice(0, 5)} · {PERIODO_DIA_LABEL[l.periodo]}</span>;
+}
+
+function parseDataBr(data: string): number {
+  const [d, m, y] = data.split("/").map(Number);
+  return new Date(y, m - 1, d).getTime();
+}
+
+function StatusStamp({ l, onMudarStatus }: { l: Limpeza; onMudarStatus: (novo: StatusLimpeza) => void }) {
   return (
-    <div className="modal-overlay" onClick={onFechar}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-icon"><AlertIcon /></div>
-        <h2 className="modal-title">{atual.titulo}</h2>
-        <p className="modal-text">{atual.texto}</p>
-        <div className="tour-dots">
-          {TOUR_PASSOS.map((_, i) => (
-            <span key={i} className={`tour-dot ${i === passo ? "active" : ""}`} />
-          ))}
-        </div>
-        <div className="btn-row">
-          <button className="btn btn-ghost" onClick={onFechar}>Pular</button>
-          <button
-            className="btn btn-primary"
-            onClick={() => (ultimo ? onFechar() : setPasso((p) => p + 1))}
-          >
-            {ultimo ? "Entendi" : "Próximo"}
-          </button>
+    <span className={`stamp stamp-select-wrap ${l.status}`} onClick={(e) => e.stopPropagation()}>
+      <select
+        className="stamp-select"
+        value={l.status}
+        onChange={(e) => onMudarStatus(e.target.value as StatusLimpeza)}
+      >
+        {STATUS_LIMPEZA_ORDEM.map((s) => (
+          <option key={s} value={s}>{STATUS_LIMPEZA_LABEL[s]}</option>
+        ))}
+      </select>
+    </span>
+  );
+}
+
+type PessoaCardProps = {
+  nome: string;
+  presente?: boolean;
+  atribuicoes: Limpeza[];
+  filtroDia: string;
+  onMudarStatus: (id: string, novoStatus: StatusLimpeza) => void;
+  onAbrirDetalhe: (id: string) => void;
+};
+
+function PessoaCard({ nome, presente, atribuicoes, filtroDia, onMudarStatus, onAbrirDetalhe }: PessoaCardProps) {
+  const [aberto, setAberto] = useState(false);
+
+  return (
+    <div className={`pessoa-card ${presente === false ? "ausente" : ""}`}>
+      <div className="pessoa-card-head" onClick={() => setAberto((a) => !a)}>
+        <span className="pessoa-nome">{nome}</span>
+        <div className="pessoa-card-head-right">
+          {presente !== undefined && (
+            <span className={`presenca-tag ${presente ? "presente" : "ausente"}`}>
+              {presente ? "Presente" : "Ausente"}
+            </span>
+          )}
+          <span className={`pessoa-chevron ${aberto ? "aberto" : ""}`}><ChevronDownIcon /></span>
         </div>
       </div>
+
+      {aberto && (
+        atribuicoes.length === 0 ? (
+          <div className="pessoa-vazio">
+            Nenhuma limpeza atribuída{filtroDia !== "Todos" ? ` na ${filtroDia}` : ""}.
+          </div>
+        ) : (
+          atribuicoes.map((l) => (
+            <div key={l.id} className="pessoa-linha" onClick={() => onAbrirDetalhe(l.id)}>
+              <div>
+                <DiaPeriodoChip l={l} />
+                <div className="reg-local">Bloco {l.bloco} · Apto {l.apto}</div>
+                <div className="reg-meta">{TIPOS_LIMPEZA[l.tipo]}</div>
+              </div>
+              <StatusStamp l={l} onMudarStatus={(novo) => onMudarStatus(l.id, novo)} />
+            </div>
+          ))
+        )
+      )}
+
+      {aberto && atribuicoes.some((l) => l.pendenteRedistribuicao) && (
+        <div className="alert-banner" style={{ marginTop: 4, marginBottom: 0 }}>
+          <AlertIcon />
+          <span>Pendente de redistribuição — sem responsável confirmado</span>
+        </div>
+      )}
     </div>
   );
 }
 
-function DiaPeriodoChip({ l }: { l: Limpeza }) {
-  return <span className="dia-chip">{l.diaSemana} · {PERIODO_DIA_LABEL[l.periodo]}</span>;
-}
-
 type LimpezaPainelProps = {
   limpezas: Limpeza[];
+  onMudarStatus: (id: string, novoStatus: StatusLimpeza) => void;
   onAbrirDetalhe: (id: string) => void;
 };
 
-export function LimpezaPainel({ limpezas, onAbrirDetalhe }: LimpezaPainelProps) {
+export function LimpezaPainel({ limpezas, onMudarStatus, onAbrirDetalhe }: LimpezaPainelProps) {
   const [filtroTipo, setFiltroTipo] = useState<"todos" | TipoLimpezaKey>("todos");
-  const [filtroFuncionaria, setFiltroFuncionaria] = useState("todas");
-  const [filtroApto, setFiltroApto] = useState("todos");
-  const [mostrarTour, setMostrarTour] = useState(true);
+  const [filtroDia, setFiltroDia] = useState("Todos");
 
-  const aptos = Array.from(new Set(limpezas.map((l) => `${l.bloco}/${l.apto}`))).sort();
-
-  const lista = limpezas
-    .filter((l) => filtroTipo === "todos" || l.tipo === filtroTipo)
-    .filter((l) => filtroFuncionaria === "todas" || l.funcionaria === filtroFuncionaria)
-    .filter((l) => filtroApto === "todos" || `${l.bloco}/${l.apto}` === filtroApto)
-    .sort((a, b) => b.id.localeCompare(a.id));
+  const pessoas = FUNCIONARIAS_LIMPEZA.map((nome) => {
+    const atribuicoes = limpezas
+      .filter((l) => l.funcionaria === nome)
+      .filter((l) => filtroTipo === "todos" || l.tipo === filtroTipo)
+      .filter((l) => filtroDia === "Todos" || l.diaSemana === filtroDia)
+      .sort((a, b) => parseDataBr(a.data) - parseDataBr(b.data) || a.periodo.localeCompare(b.periodo));
+    const presente = filtroDia !== "Todos" ? PRESENCA_SEMANA[nome]?.[filtroDia] : undefined;
+    return { nome, atribuicoes, presente };
+  });
 
   return (
     <>
@@ -92,9 +128,18 @@ export function LimpezaPainel({ limpezas, onAbrirDetalhe }: LimpezaPainelProps) 
       <p className="screen-sub">
         Você solicita a limpeza ao almoxarifado — a retirada do material é feita pela própria colaboradora.
       </p>
-      <button className="btn btn-ghost" style={{ marginBottom: 18 }} onClick={() => setMostrarTour(true)}>
-        Fazer tour rápido
-      </button>
+
+      <div className="filtros" style={{ flexWrap: "wrap" }}>
+        {FILTROS_DIA.map((d) => (
+          <div
+            key={d}
+            className={`filtro-chip ${filtroDia === d ? "active" : ""}`}
+            onClick={() => setFiltroDia(filtroDia === d ? "Todos" : d)}
+          >
+            {d}
+          </div>
+        ))}
+      </div>
 
       <div className="filtros">
         {FILTROS_TIPO.map((f) => (
@@ -108,57 +153,18 @@ export function LimpezaPainel({ limpezas, onAbrirDetalhe }: LimpezaPainelProps) 
         ))}
       </div>
 
-      <div className="field-row">
-        <div>
-          <label>Funcionária</label>
-          <select value={filtroFuncionaria} onChange={(e) => setFiltroFuncionaria(e.target.value)}>
-            <option value="todas">Todas</option>
-            {FUNCIONARIAS_LIMPEZA.map((f) => (
-              <option key={f} value={f}>{f}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label>Apartamento</label>
-          <select value={filtroApto} onChange={(e) => setFiltroApto(e.target.value)}>
-            <option value="todos">Todos</option>
-            {aptos.map((a) => (
-              <option key={a} value={a}>Bloco {a.replace("/", " · Apto ")}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="section-label">Registros</div>
-      {lista.length === 0 ? (
-        <div className="empty-state">
-          <EmptyIcon />
-          <div>Nenhuma limpeza neste filtro.</div>
-        </div>
-      ) : (
-        lista.map((l) => (
-          <div key={l.id} className={`reg-card reg-card-${l.status}`} onClick={() => onAbrirDetalhe(l.id)}>
-            <div className="reg-top">
-              <div style={{ flex: 1 }}>
-                <DiaPeriodoChip l={l} />
-                <div className="reg-local">Bloco {l.bloco} · Apto {l.apto}</div>
-                <div className="reg-meta">{TIPOS_LIMPEZA[l.tipo]}</div>
-                <div className="reg-meta">{l.funcionaria}</div>
-              </div>
-              <span className={`stamp ${l.status}`}>{STATUS_LIMPEZA_LABEL[l.status]}</span>
-            </div>
-            {l.pendenteRedistribuicao && (
-              <div className="alert-banner" style={{ marginTop: 10, marginBottom: 0 }}>
-                <AlertIcon />
-                <span>Pendente de redistribuição — sem responsável confirmado</span>
-              </div>
-            )}
-            <div className="reg-data">{l.data}</div>
-          </div>
-        ))
-      )}
-
-      {mostrarTour && <TourModal onFechar={() => setMostrarTour(false)} />}
+      <div className="section-label">Equipe</div>
+      {pessoas.map((p) => (
+        <PessoaCard
+          key={p.nome}
+          nome={p.nome}
+          presente={p.presente}
+          atribuicoes={p.atribuicoes}
+          filtroDia={filtroDia}
+          onMudarStatus={onMudarStatus}
+          onAbrirDetalhe={onAbrirDetalhe}
+        />
+      ))}
     </>
   );
 }
@@ -198,10 +204,9 @@ export function LimpezaDetalhe({ limpeza: l, onMudarStatus }: LimpezaDetalheProp
           <div>
             <DiaPeriodoChip l={l} />
             <div className="reg-local">Bloco {l.bloco} · Apto {l.apto}</div>
-            <div className="reg-meta">{TIPOS_LIMPEZA[l.tipo]}</div>
-            <div className="reg-meta">{l.data} · {l.funcionaria}</div>
+            <div className="reg-meta">{TIPOS_LIMPEZA[l.tipo]} · {l.funcionaria}</div>
           </div>
-          <span className={`stamp ${l.status}`}>{STATUS_LIMPEZA_LABEL[l.status]}</span>
+          <StatusStamp l={l} onMudarStatus={onMudarStatus} />
         </div>
       </div>
 
@@ -247,22 +252,6 @@ export function LimpezaDetalhe({ limpeza: l, onMudarStatus }: LimpezaDetalheProp
           {m}
         </div>
       ))}
-
-      <div className="section-label">Atualizar status</div>
-      <p className="screen-sub" style={{ marginTop: -14 }}>
-        Você decide o status — use quando tiver certeza do andamento, mesmo sem confirmação da colaboradora.
-      </p>
-      <div className="filtros" style={{ flexWrap: "wrap" }}>
-        {STATUS_LIMPEZA_ORDEM.map((s) => (
-          <div
-            key={s}
-            className={`filtro-chip ${l.status === s ? "active" : ""}`}
-            onClick={() => onMudarStatus(s)}
-          >
-            {STATUS_LIMPEZA_LABEL[s]}
-          </div>
-        ))}
-      </div>
     </>
   );
 }

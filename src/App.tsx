@@ -184,6 +184,7 @@ export default function App() {
         {screen === "fiscal-limpeza" && (
           <LimpezaPainel
             limpezas={limpezas}
+            onMudarStatus={updateStatusLimpeza}
             onAbrirDetalhe={(id) => {
               setLimpezaId(id);
               go("fiscal-limpeza-detalhe");

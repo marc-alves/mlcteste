@@ -288,7 +288,14 @@ export const TEMPLATES_MATERIAIS: Record<TipoLimpezaKey, string[]> = {
   ],
 };
 
-export const FUNCIONARIAS_LIMPEZA: string[] = ["Marta Silva", "Rosa Pereira", "Lúcia Fernandes", "Débora Santos"];
+export const FUNCIONARIAS_LIMPEZA: string[] = [
+  "Marta Silva",
+  "Rosa Pereira",
+  "Lúcia Fernandes",
+  "Débora Santos",
+  "Maria Eduarda",
+  "Camila Duarte",
+];
 
 // O arquiteto precisa lembrar de solicitar ao almoxarifado — "a_solicitar"
 // existe pra isso, como um lembrete visual (não é um alerta: é o normal no
@@ -332,6 +339,7 @@ export type Limpeza = {
 };
 
 const DIAS_SEMANA = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+export const DIAS_UTEIS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
 function diaSemana(dataBr: string): string {
   const [d, m, y] = dataBr.split("/").map(Number);
@@ -341,6 +349,14 @@ function diaSemana(dataBr: string): string {
 function criarLimpeza(base: Omit<Limpeza, "diaSemana">): Limpeza {
   return { ...base, diaSemana: diaSemana(base.data) };
 }
+
+// Presença semanal por funcionária, mockada — usada no painel de limpeza
+// pra mostrar se ela está presente naquele dia, sem depender de um perfil
+// de "Gestão" (que marcaria isso de verdade e ainda não existe no app).
+export const PRESENCA_SEMANA: Record<string, Record<string, boolean>> = Object.fromEntries(
+  FUNCIONARIAS_LIMPEZA.map((f) => [f, Object.fromEntries(DIAS_UTEIS.map((d) => [d, true]))])
+);
+PRESENCA_SEMANA["Lúcia Fernandes"]["Terça"] = false;
 
 export const LIMPEZAS_INICIAIS: Limpeza[] = [
   criarLimpeza({
@@ -364,11 +380,23 @@ export const LIMPEZAS_INICIAIS: Limpeza[] = [
     periodo: "tarde", status: "em_andamento", retiradoEm: "07/07/2026 07:55",
   }),
   criarLimpeza({
-    id: "LZ5", bloco: "A", apto: "305", tipo: "fina", funcionaria: "Marta Silva", data: "05/07/2026",
-    periodo: "manha", status: "retirado", retiradoEm: "05/07/2026 07:30",
+    id: "LZ5", bloco: "A", apto: "305", tipo: "fina", funcionaria: "Marta Silva", data: "09/07/2026",
+    periodo: "manha", status: "retirado", retiradoEm: "09/07/2026 07:30",
   }),
   criarLimpeza({
     id: "LZ6", bloco: "C", apto: "108", tipo: "grossa", funcionaria: "Rosa Pereira", data: "03/07/2026",
     periodo: "manha", status: "retirado", retiradoEm: "03/07/2026 07:20",
+  }),
+  criarLimpeza({
+    id: "LZ7", bloco: "A", apto: "102", tipo: "fina", funcionaria: "Maria Eduarda", data: "08/07/2026",
+    periodo: "manha", status: "solicitado",
+  }),
+  criarLimpeza({
+    id: "LZ8", bloco: "B", apto: "202", tipo: "grossa", funcionaria: "Maria Eduarda", data: "08/07/2026",
+    periodo: "tarde", status: "a_solicitar",
+  }),
+  criarLimpeza({
+    id: "LZ9", bloco: "B", apto: "401", tipo: "grossa", funcionaria: "Camila Duarte", data: "03/07/2026",
+    periodo: "manha", status: "retirado", retiradoEm: "03/07/2026 07:15",
   }),
 ];
